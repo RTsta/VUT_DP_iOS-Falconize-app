@@ -7,18 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8FC3CF9428E5CD2D009917F4 /* CameraTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9328E5CD2D009917F4 /* CameraTestApp.swift */; };
+		8F5D3773291A90C80073F105 /* CameraPreviewUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5D3772291A90C80073F105 /* CameraPreviewUIView.swift */; };
+		8F5D3777291A9FA50073F105 /* StickFigureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5D3776291A9FA50073F105 /* StickFigureView.swift */; };
+		8F5D3779291B196F0073F105 /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5D3778291B196F0073F105 /* CameraCaptureView.swift */; };
+		8FB81D9E292B9B3100AA73FD /* CameraViewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81D9D292B9B3100AA73FD /* CameraViewStore.swift */; };
+		8FB81DA2292E8B7700AA73FD /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA1292E8B7700AA73FD /* PhotoCaptureProcessor.swift */; };
+		8FB81DA4292EAACB00AA73FD /* CameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA3292EAACB00AA73FD /* CameraModel.swift */; };
+		8FB81DA7292EAD6100AA73FD /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA6292EAD6100AA73FD /* CameraPreview.swift */; };
+		8FB81DA9292EAFB000AA73FD /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA8292EAFB000AA73FD /* CameraView.swift */; };
+		8FC3CF9428E5CD2D009917F4 /* FalconizeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9328E5CD2D009917F4 /* FalconizeApp.swift */; };
 		8FC3CF9628E5CD2D009917F4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9528E5CD2D009917F4 /* ContentView.swift */; };
 		8FC3CF9828E5CD2E009917F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9728E5CD2E009917F4 /* Assets.xcassets */; };
 		8FC3CF9B28E5CD2E009917F4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */; };
+		8FF2526D29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 8FF2526C29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel */; };
+		8FF2526F2918817000BFA014 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF2526E2918817000BFA014 /* CameraViewController.swift */; };
+		8FF252712918821A00BFA014 /* CameraHostedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF252702918821A00BFA014 /* CameraHostedView.swift */; };
+		8FF252752918845000BFA014 /* PosePredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF252742918845000BFA014 /* PosePredictor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8FC3CF9028E5CD2D009917F4 /* CameraTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CameraTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8FC3CF9328E5CD2D009917F4 /* CameraTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraTestApp.swift; sourceTree = "<group>"; };
+		8F5D3772291A90C80073F105 /* CameraPreviewUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewUIView.swift; sourceTree = "<group>"; };
+		8F5D3776291A9FA50073F105 /* StickFigureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickFigureView.swift; sourceTree = "<group>"; };
+		8F5D3778291B196F0073F105 /* CameraCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureView.swift; sourceTree = "<group>"; };
+		8FB81D9D292B9B3100AA73FD /* CameraViewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewStore.swift; sourceTree = "<group>"; };
+		8FB81DA1292E8B7700AA73FD /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
+		8FB81DA3292EAACB00AA73FD /* CameraModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraModel.swift; sourceTree = "<group>"; };
+		8FB81DA6292EAD6100AA73FD /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
+		8FB81DA8292EAFB000AA73FD /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		8FC3CF9028E5CD2D009917F4 /* Falconize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Falconize.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8FC3CF9328E5CD2D009917F4 /* FalconizeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FalconizeApp.swift; sourceTree = "<group>"; };
 		8FC3CF9528E5CD2D009917F4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8FC3CF9728E5CD2E009917F4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8FF2526C29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = "FewMovementsClasifier 2.mlmodel"; sourceTree = "<group>"; };
+		8FF2526E2918817000BFA014 /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
+		8FF252702918821A00BFA014 /* CameraHostedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraHostedView.swift; sourceTree = "<group>"; };
+		8FF252742918845000BFA014 /* PosePredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PosePredictor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,10 +56,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8F5D3771291A8FC10073F105 /* useless */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = useless;
+			sourceTree = "<group>";
+		};
+		8FB81DA5292EAD4D00AA73FD /* SwiftUICAM */ = {
+			isa = PBXGroup;
+			children = (
+				8FB81DA3292EAACB00AA73FD /* CameraModel.swift */,
+				8FB81DA8292EAFB000AA73FD /* CameraView.swift */,
+				8FB81DA6292EAD6100AA73FD /* CameraPreview.swift */,
+			);
+			path = SwiftUICAM;
+			sourceTree = "<group>";
+		};
 		8FC3CF8728E5CD2D009917F4 = {
 			isa = PBXGroup;
 			children = (
-				8FC3CF9228E5CD2D009917F4 /* CameraTest */,
+				8FC3CF9228E5CD2D009917F4 /* Falconize */,
 				8FC3CF9128E5CD2D009917F4 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,20 +84,27 @@
 		8FC3CF9128E5CD2D009917F4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8FC3CF9028E5CD2D009917F4 /* CameraTest.app */,
+				8FC3CF9028E5CD2D009917F4 /* Falconize.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8FC3CF9228E5CD2D009917F4 /* CameraTest */ = {
+		8FC3CF9228E5CD2D009917F4 /* Falconize */ = {
 			isa = PBXGroup;
 			children = (
-				8FC3CF9328E5CD2D009917F4 /* CameraTestApp.swift */,
+				8FC3CF9328E5CD2D009917F4 /* FalconizeApp.swift */,
 				8FC3CF9528E5CD2D009917F4 /* ContentView.swift */,
+				8F5D3778291B196F0073F105 /* CameraCaptureView.swift */,
+				8FF25276291A88CF00BFA014 /* CameraView */,
+				8F5D3776291A9FA50073F105 /* StickFigureView.swift */,
+				8FF252742918845000BFA014 /* PosePredictor.swift */,
+				8FB81DA5292EAD4D00AA73FD /* SwiftUICAM */,
+				8F5D3771291A8FC10073F105 /* useless */,
+				8FF2526C29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel */,
 				8FC3CF9728E5CD2E009917F4 /* Assets.xcassets */,
 				8FC3CF9928E5CD2E009917F4 /* Preview Content */,
 			);
-			path = CameraTest;
+			path = Falconize;
 			sourceTree = "<group>";
 		};
 		8FC3CF9928E5CD2E009917F4 /* Preview Content */ = {
@@ -67,12 +115,24 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		8FF25276291A88CF00BFA014 /* CameraView */ = {
+			isa = PBXGroup;
+			children = (
+				8FB81DA1292E8B7700AA73FD /* PhotoCaptureProcessor.swift */,
+				8FB81D9D292B9B3100AA73FD /* CameraViewStore.swift */,
+				8FF252702918821A00BFA014 /* CameraHostedView.swift */,
+				8FF2526E2918817000BFA014 /* CameraViewController.swift */,
+				8F5D3772291A90C80073F105 /* CameraPreviewUIView.swift */,
+			);
+			path = CameraView;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8FC3CF8F28E5CD2D009917F4 /* CameraTest */ = {
+		8FC3CF8F28E5CD2D009917F4 /* Falconize */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8FC3CF9E28E5CD2E009917F4 /* Build configuration list for PBXNativeTarget "CameraTest" */;
+			buildConfigurationList = 8FC3CF9E28E5CD2E009917F4 /* Build configuration list for PBXNativeTarget "Falconize" */;
 			buildPhases = (
 				8FC3CF8C28E5CD2D009917F4 /* Sources */,
 				8FC3CF8D28E5CD2D009917F4 /* Frameworks */,
@@ -82,9 +142,9 @@
 			);
 			dependencies = (
 			);
-			name = CameraTest;
+			name = Falconize;
 			productName = CameraTest;
-			productReference = 8FC3CF9028E5CD2D009917F4 /* CameraTest.app */;
+			productReference = 8FC3CF9028E5CD2D009917F4 /* Falconize.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -102,7 +162,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 8FC3CF8B28E5CD2D009917F4 /* Build configuration list for PBXProject "CameraTest" */;
+			buildConfigurationList = 8FC3CF8B28E5CD2D009917F4 /* Build configuration list for PBXProject "Falconize" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -115,7 +175,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8FC3CF8F28E5CD2D009917F4 /* CameraTest */,
+				8FC3CF8F28E5CD2D009917F4 /* Falconize */,
 			);
 		};
 /* End PBXProject section */
@@ -137,8 +197,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8FB81DA2292E8B7700AA73FD /* PhotoCaptureProcessor.swift in Sources */,
+				8FB81DA9292EAFB000AA73FD /* CameraView.swift in Sources */,
+				8F5D3777291A9FA50073F105 /* StickFigureView.swift in Sources */,
+				8FB81DA4292EAACB00AA73FD /* CameraModel.swift in Sources */,
 				8FC3CF9628E5CD2D009917F4 /* ContentView.swift in Sources */,
-				8FC3CF9428E5CD2D009917F4 /* CameraTestApp.swift in Sources */,
+				8FF252712918821A00BFA014 /* CameraHostedView.swift in Sources */,
+				8FB81D9E292B9B3100AA73FD /* CameraViewStore.swift in Sources */,
+				8F5D3779291B196F0073F105 /* CameraCaptureView.swift in Sources */,
+				8FF2526F2918817000BFA014 /* CameraViewController.swift in Sources */,
+				8FC3CF9428E5CD2D009917F4 /* FalconizeApp.swift in Sources */,
+				8FF252752918845000BFA014 /* PosePredictor.swift in Sources */,
+				8FB81DA7292EAD6100AA73FD /* CameraPreview.swift in Sources */,
+				8FF2526D29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel in Sources */,
+				8F5D3773291A90C80073F105 /* CameraPreviewUIView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,10 +338,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"CameraTest/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Falconize/Preview Content\"";
 				DEVELOPMENT_TEAM = 995Z92HMCB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "For testing puroses";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -280,7 +353,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "art.i-nacar.CameraTest";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.nacar.Falconize;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -295,10 +368,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"CameraTest/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Falconize/Preview Content\"";
 				DEVELOPMENT_TEAM = 995Z92HMCB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "For testing puroses";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -309,7 +383,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "art.i-nacar.CameraTest";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.nacar.Falconize;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -320,7 +394,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8FC3CF8B28E5CD2D009917F4 /* Build configuration list for PBXProject "CameraTest" */ = {
+		8FC3CF8B28E5CD2D009917F4 /* Build configuration list for PBXProject "Falconize" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8FC3CF9C28E5CD2E009917F4 /* Debug */,
@@ -329,7 +403,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8FC3CF9E28E5CD2E009917F4 /* Build configuration list for PBXNativeTarget "CameraTest" */ = {
+		8FC3CF9E28E5CD2E009917F4 /* Build configuration list for PBXNativeTarget "Falconize" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8FC3CF9F28E5CD2E009917F4 /* Debug */,

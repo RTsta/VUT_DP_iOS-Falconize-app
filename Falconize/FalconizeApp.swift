@@ -1,6 +1,6 @@
 //
-//  CameraTestApp.swift
-//  CameraTest
+//  FalconizeApp.swift
+//  Falconize
 //
 //  Created by Arthur Nácar on 29.09.2022.
 //
