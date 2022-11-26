@@ -7,41 +7,47 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8F5D3773291A90C80073F105 /* CameraPreviewUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5D3772291A90C80073F105 /* CameraPreviewUIView.swift */; };
 		8F5D3777291A9FA50073F105 /* StickFigureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5D3776291A9FA50073F105 /* StickFigureView.swift */; };
-		8F5D3779291B196F0073F105 /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5D3778291B196F0073F105 /* CameraCaptureView.swift */; };
-		8FB81D9E292B9B3100AA73FD /* CameraViewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81D9D292B9B3100AA73FD /* CameraViewStore.swift */; };
-		8FB81DA2292E8B7700AA73FD /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA1292E8B7700AA73FD /* PhotoCaptureProcessor.swift */; };
-		8FB81DA4292EAACB00AA73FD /* CameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA3292EAACB00AA73FD /* CameraModel.swift */; };
-		8FB81DA7292EAD6100AA73FD /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA6292EAD6100AA73FD /* CameraPreview.swift */; };
 		8FB81DA9292EAFB000AA73FD /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA8292EAFB000AA73FD /* CameraView.swift */; };
+		8FB81DAB2930166200AA73FD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DAA2930166200AA73FD /* AppDelegate.swift */; };
+		8FB81DB329302BEE00AA73FD /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DAC29302BED00AA73FD /* CameraViewController.swift */; };
+		8FB81DB429302BEE00AA73FD /* CameraPreviewUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DAD29302BEE00AA73FD /* CameraPreviewUIView.swift */; };
+		8FB81DB529302BEE00AA73FD /* CameraHostedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DAE29302BEE00AA73FD /* CameraHostedView.swift */; };
+		8FB81DB629302BEE00AA73FD /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DAF29302BEE00AA73FD /* CameraCaptureView.swift */; };
+		8FB81DB729302BEE00AA73FD /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DB129302BEE00AA73FD /* PhotoCaptureProcessor.swift */; };
+		8FB81DB829302BEE00AA73FD /* CameraViewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DB229302BEE00AA73FD /* CameraViewStore.swift */; };
+		8FB81DBA2930374900AA73FD /* PoseTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DB92930374900AA73FD /* PoseTextView.swift */; };
+		8FB81DBC29315A4000AA73FD /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DBB29315A4000AA73FD /* CameraService.swift */; };
+		8FB81DBF29316C1200AA73FD /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DBE29316C1200AA73FD /* CameraViewModel.swift */; };
+		8FB81DC129316EFB00AA73FD /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DC029316EFB00AA73FD /* CameraPreview.swift */; };
 		8FC3CF9428E5CD2D009917F4 /* FalconizeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9328E5CD2D009917F4 /* FalconizeApp.swift */; };
 		8FC3CF9628E5CD2D009917F4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9528E5CD2D009917F4 /* ContentView.swift */; };
 		8FC3CF9828E5CD2E009917F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9728E5CD2E009917F4 /* Assets.xcassets */; };
 		8FC3CF9B28E5CD2E009917F4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */; };
 		8FF2526D29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 8FF2526C29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel */; };
-		8FF2526F2918817000BFA014 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF2526E2918817000BFA014 /* CameraViewController.swift */; };
-		8FF252712918821A00BFA014 /* CameraHostedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF252702918821A00BFA014 /* CameraHostedView.swift */; };
 		8FF252752918845000BFA014 /* PosePredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF252742918845000BFA014 /* PosePredictor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8F5D3772291A90C80073F105 /* CameraPreviewUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewUIView.swift; sourceTree = "<group>"; };
 		8F5D3776291A9FA50073F105 /* StickFigureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickFigureView.swift; sourceTree = "<group>"; };
-		8F5D3778291B196F0073F105 /* CameraCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureView.swift; sourceTree = "<group>"; };
-		8FB81D9D292B9B3100AA73FD /* CameraViewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewStore.swift; sourceTree = "<group>"; };
-		8FB81DA1292E8B7700AA73FD /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
-		8FB81DA3292EAACB00AA73FD /* CameraModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraModel.swift; sourceTree = "<group>"; };
-		8FB81DA6292EAD6100AA73FD /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
 		8FB81DA8292EAFB000AA73FD /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		8FB81DAA2930166200AA73FD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8FB81DAC29302BED00AA73FD /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
+		8FB81DAD29302BEE00AA73FD /* CameraPreviewUIView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraPreviewUIView.swift; sourceTree = "<group>"; };
+		8FB81DAE29302BEE00AA73FD /* CameraHostedView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraHostedView.swift; sourceTree = "<group>"; };
+		8FB81DAF29302BEE00AA73FD /* CameraCaptureView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraCaptureView.swift; sourceTree = "<group>"; };
+		8FB81DB129302BEE00AA73FD /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
+		8FB81DB229302BEE00AA73FD /* CameraViewStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewStore.swift; sourceTree = "<group>"; };
+		8FB81DB92930374900AA73FD /* PoseTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseTextView.swift; sourceTree = "<group>"; };
+		8FB81DBB29315A4000AA73FD /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
+		8FB81DBE29316C1200AA73FD /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		8FB81DC029316EFB00AA73FD /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
 		8FC3CF9028E5CD2D009917F4 /* Falconize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Falconize.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8FC3CF9328E5CD2D009917F4 /* FalconizeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FalconizeApp.swift; sourceTree = "<group>"; };
 		8FC3CF9528E5CD2D009917F4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8FC3CF9728E5CD2E009917F4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8FF2526C29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = "FewMovementsClasifier 2.mlmodel"; sourceTree = "<group>"; };
-		8FF2526E2918817000BFA014 /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
-		8FF252702918821A00BFA014 /* CameraHostedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraHostedView.swift; sourceTree = "<group>"; };
 		8FF252742918845000BFA014 /* PosePredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PosePredictor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -59,18 +65,33 @@
 		8F5D3771291A8FC10073F105 /* useless */ = {
 			isa = PBXGroup;
 			children = (
+				8FB81DAF29302BEE00AA73FD /* CameraCaptureView.swift */,
+				8FB81DAE29302BEE00AA73FD /* CameraHostedView.swift */,
+				8FB81DAD29302BEE00AA73FD /* CameraPreviewUIView.swift */,
+				8FB81DB029302BEE00AA73FD /* CameraView */,
+				8FB81DAC29302BED00AA73FD /* CameraViewController.swift */,
+				8FB81DB229302BEE00AA73FD /* CameraViewStore.swift */,
+				8FB81DB129302BEE00AA73FD /* PhotoCaptureProcessor.swift */,
 			);
 			path = useless;
 			sourceTree = "<group>";
 		};
-		8FB81DA5292EAD4D00AA73FD /* SwiftUICAM */ = {
+		8FB81DB029302BEE00AA73FD /* CameraView */ = {
 			isa = PBXGroup;
 			children = (
-				8FB81DA3292EAACB00AA73FD /* CameraModel.swift */,
-				8FB81DA8292EAFB000AA73FD /* CameraView.swift */,
-				8FB81DA6292EAD6100AA73FD /* CameraPreview.swift */,
 			);
-			path = SwiftUICAM;
+			path = CameraView;
+			sourceTree = "<group>";
+		};
+		8FB81DBD29316BDD00AA73FD /* CameraView */ = {
+			isa = PBXGroup;
+			children = (
+				8FB81DA8292EAFB000AA73FD /* CameraView.swift */,
+				8FB81DBE29316C1200AA73FD /* CameraViewModel.swift */,
+				8FB81DBB29315A4000AA73FD /* CameraService.swift */,
+				8FB81DC029316EFB00AA73FD /* CameraPreview.swift */,
+			);
+			path = CameraView;
 			sourceTree = "<group>";
 		};
 		8FC3CF8728E5CD2D009917F4 = {
@@ -93,12 +114,12 @@
 			isa = PBXGroup;
 			children = (
 				8FC3CF9328E5CD2D009917F4 /* FalconizeApp.swift */,
+				8FB81DAA2930166200AA73FD /* AppDelegate.swift */,
 				8FC3CF9528E5CD2D009917F4 /* ContentView.swift */,
-				8F5D3778291B196F0073F105 /* CameraCaptureView.swift */,
-				8FF25276291A88CF00BFA014 /* CameraView */,
 				8F5D3776291A9FA50073F105 /* StickFigureView.swift */,
+				8FB81DB92930374900AA73FD /* PoseTextView.swift */,
 				8FF252742918845000BFA014 /* PosePredictor.swift */,
-				8FB81DA5292EAD4D00AA73FD /* SwiftUICAM */,
+				8FB81DBD29316BDD00AA73FD /* CameraView */,
 				8F5D3771291A8FC10073F105 /* useless */,
 				8FF2526C29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel */,
 				8FC3CF9728E5CD2E009917F4 /* Assets.xcassets */,
@@ -113,18 +134,6 @@
 				8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		8FF25276291A88CF00BFA014 /* CameraView */ = {
-			isa = PBXGroup;
-			children = (
-				8FB81DA1292E8B7700AA73FD /* PhotoCaptureProcessor.swift */,
-				8FB81D9D292B9B3100AA73FD /* CameraViewStore.swift */,
-				8FF252702918821A00BFA014 /* CameraHostedView.swift */,
-				8FF2526E2918817000BFA014 /* CameraViewController.swift */,
-				8F5D3772291A90C80073F105 /* CameraPreviewUIView.swift */,
-			);
-			path = CameraView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -197,20 +206,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8FB81DA2292E8B7700AA73FD /* PhotoCaptureProcessor.swift in Sources */,
 				8FB81DA9292EAFB000AA73FD /* CameraView.swift in Sources */,
+				8FB81DB329302BEE00AA73FD /* CameraViewController.swift in Sources */,
+				8FB81DB429302BEE00AA73FD /* CameraPreviewUIView.swift in Sources */,
 				8F5D3777291A9FA50073F105 /* StickFigureView.swift in Sources */,
-				8FB81DA4292EAACB00AA73FD /* CameraModel.swift in Sources */,
+				8FB81DBC29315A4000AA73FD /* CameraService.swift in Sources */,
+				8FB81DBF29316C1200AA73FD /* CameraViewModel.swift in Sources */,
+				8FB81DBA2930374900AA73FD /* PoseTextView.swift in Sources */,
+				8FB81DB729302BEE00AA73FD /* PhotoCaptureProcessor.swift in Sources */,
+				8FB81DB829302BEE00AA73FD /* CameraViewStore.swift in Sources */,
+				8FB81DC129316EFB00AA73FD /* CameraPreview.swift in Sources */,
+				8FB81DAB2930166200AA73FD /* AppDelegate.swift in Sources */,
 				8FC3CF9628E5CD2D009917F4 /* ContentView.swift in Sources */,
-				8FF252712918821A00BFA014 /* CameraHostedView.swift in Sources */,
-				8FB81D9E292B9B3100AA73FD /* CameraViewStore.swift in Sources */,
-				8F5D3779291B196F0073F105 /* CameraCaptureView.swift in Sources */,
-				8FF2526F2918817000BFA014 /* CameraViewController.swift in Sources */,
 				8FC3CF9428E5CD2D009917F4 /* FalconizeApp.swift in Sources */,
+				8FB81DB629302BEE00AA73FD /* CameraCaptureView.swift in Sources */,
+				8FB81DB529302BEE00AA73FD /* CameraHostedView.swift in Sources */,
 				8FF252752918845000BFA014 /* PosePredictor.swift in Sources */,
-				8FB81DA7292EAD6100AA73FD /* CameraPreview.swift in Sources */,
 				8FF2526D29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel in Sources */,
-				8F5D3773291A90C80073F105 /* CameraPreviewUIView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

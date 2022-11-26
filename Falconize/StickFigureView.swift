@@ -16,9 +16,14 @@ struct StickFigureView: View {
         func path(in rect: CGRect) -> Path {
             var path = Path()
             path.move(to: points[0])
-            points.forEach{
-                path.addLine(to: $0)
+            
+            for point in points{
+                if (point.y == 0.0 || point.y == 1.0){
+                    break
+                }
+                path.addLine(to: point)
             }
+                
             path = path.applying(CGAffineTransform.identity.scaledBy(x: size.width, y: size.height))
             path = path.applying(CGAffineTransform(scaleX: -1, y: -1).translatedBy(x: -size.width, y: -size.height))
             return path

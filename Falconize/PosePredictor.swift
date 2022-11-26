@@ -8,11 +8,24 @@
 import Foundation
 import Vision
 import AVFoundation
+import Combine
 
 class PosePredictor: NSObject, ObservableObject {
     let sequenceHandler = VNSequenceRequestHandler()
     @Published var bodyParts = [VNHumanBodyPoseObservation.JointName : VNRecognizedPoint]()
+    var subscriptions = Set<AnyCancellable>()
     var cameraPosition: AVFoundation.AVCaptureDevice.Position?
+    
+    var overNose = false
+    @Published var actionCount = 0
+    
+    override init(){
+        super.init()
+        $bodyParts
+            .dropFirst()
+            .sink(receiveValue: { bodyParts in self.countActions(bodyParts: bodyParts)})
+            .store(in: &subscriptions)
+    }
     
 }
 
@@ -36,6 +49,22 @@ extension PosePredictor: AVCaptureVideoDataOutputSampleBufferDelegate {
         
         DispatchQueue.main.async {
             self.bodyParts = bodyParts
+        }
+    }
+    
+    func countActions(bodyParts: [VNHumanBodyPoseObservation.JointName : VNRecognizedPoint]) {
+        let rightWrist = bodyParts[.rightWrist]!.location
+        let leftWrist = bodyParts[.leftWrist]!.location
+        let nose = bodyParts[.nose]!.location
+
+        
+        if  nose.y < rightWrist.y && nose.y < leftWrist.y {
+            if !self.overNose {
+                self.overNose = true
+                actionCount += 1
+            }
+        } else {
+            self.overNose = false
         }
     }
 }
