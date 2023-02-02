@@ -17,12 +17,13 @@ class CameraService: NSObject {
     @Published public var isCameraUnavailable = true
     @Published var deviceLensDirection : AVCaptureDevice.Position = .unspecified
     
-    private var cameraPremissionsGranted: Bool = false
-    
-    let sessionQueue = DispatchQueue(label: "CameraQueue", qos: .userInteractive)
-    
+    private var isConfigured = false
     private var isSessionRunning = false
+    private var cameraSetupResult: SessionSetupResult = .success
+    @Published public var shouldShowSpinner = false
     
+    private var inProgressPhotoCaptureDelegates = [Int64: PhotoCaptureProcessor]()
+    let sessionQueue = DispatchQueue(label: "CameraQueue", qos: .userInteractive)
     var session = AVCaptureSession()
     
     //delegate for PosePredictor
@@ -31,40 +32,57 @@ class CameraService: NSObject {
     private var deviceInput: AVCaptureDeviceInput?
     @Published var photoOutput = AVCapturePhotoOutput()
     
+    @Published var videoOutput = AVCaptureMovieFileOutput()
+    private var videoProcessor = VideoCaptureProcessor()
+    public var isVideoRecording = false
+    /// Video will be recorded to this folder
+    public var outputFolder: String = NSTemporaryDirectory()
+    
     
     
     public func checkForPermissions() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
             case .authorized:
-                self.cameraPremissionsGranted = true
+                self.cameraSetupResult = .success
                 break
             case .notDetermined:
                 sessionQueue.suspend()
                 AVCaptureDevice.requestAccess(for: .video, completionHandler: { granted in
-                    self.cameraPremissionsGranted = granted
+                    if !granted {
+                        self.cameraSetupResult = .notAuthorized
+                    }
                     self.sessionQueue.resume()
                 })
                 
             default:
-                self.cameraPremissionsGranted = false
+                self.cameraSetupResult = .notAuthorized
                 self.isCameraUnavailable = true
                 self.isCameraButtonDisabled = true
         }
     }
     
     public func setupCameraSession() {
-        if !cameraPremissionsGranted {
+        if cameraSetupResult != .success {
             return
         }
         
+        session.beginConfiguration()
+        setupVideoInput()
+        //session.sessionPreset = .photo
+        setupPhotoOutput()
+        setupVideoOutput()
+        
+        session.commitConfiguration()
+        self.isConfigured = true
+        self.start()
+    }
+    
+    private func setupVideoInput(){
         var defaultVideoDevice: AVCaptureDevice? = AVCaptureDevice.default(for: .video)
         guard let videoDevice = defaultVideoDevice else {
             debugPrint("Default video device is unavailable.")
             return
         }
-        
-        session.beginConfiguration()
-        //session.sessionPreset = .photo
         do {
             let videoInput = try AVCaptureDeviceInput(device: videoDevice)
             if session.canAddInput(videoInput) {
@@ -76,18 +94,29 @@ class CameraService: NSObject {
         } catch {
             print("CameraService - configureSession")
             print(error.localizedDescription)
+            cameraSetupResult = .configurationFailed
             session.commitConfiguration()
             return
         }
+    }
+    
+    private func setupPhotoOutput(){
         if session.canAddOutput(photoOutput) {
             session.addOutput(photoOutput)
             //photoOutput.maxPhotoDimensions =
             //photoOutput.maxPhotoQualityPrioritization = .quality
         }
-        
-        session.commitConfiguration()
-        
-        self.start()
+    }
+    
+    private func setupVideoOutput(){
+        if self.session.canAddOutput(videoOutput) {
+            self.session.addOutput(videoOutput)
+            if let connection = videoOutput.connection(with: AVMediaType.video) {
+                if connection.isVideoStabilizationSupported {
+                    connection.preferredVideoStabilizationMode = .auto
+                }
+            }
+        }
     }
     
     func addOutputDelegate(delegate: AVCaptureVideoDataOutputSampleBufferDelegate){
@@ -106,13 +135,25 @@ class CameraService: NSObject {
     
     public func start() {
         sessionQueue.async {
-            self.session.startRunning()
-            self.isSessionRunning = self.session.isRunning
-            
-            if self.session.isRunning {
-                DispatchQueue.main.async {
-                    self.isCameraButtonDisabled = false
-                    self.isCameraUnavailable = false
+            if !self.isSessionRunning && self.isConfigured {
+                switch self.cameraSetupResult {
+                    case .success:
+                        self.session.startRunning()
+                        self.isSessionRunning = self.session.isRunning
+                        
+                        if self.session.isRunning {
+                            DispatchQueue.main.async {
+                                self.isCameraButtonDisabled = false
+                                self.isCameraUnavailable = false
+                            }
+                        }
+                        
+                    case .configurationFailed, .notAuthorized:
+                        print("Application not authorized to use camera")
+                        DispatchQueue.main.async {
+                            self.isCameraButtonDisabled = true
+                            self.isCameraUnavailable = true
+                        }
                 }
             }
         }
@@ -121,14 +162,16 @@ class CameraService: NSObject {
     public func stop(completion: (() -> ())? = nil) {
         sessionQueue.async {
             if self.isSessionRunning {
-                self.session.stopRunning()
-                self.isSessionRunning = self.session.isRunning
-                
-                if !self.session.isRunning {
-                    DispatchQueue.main.async {
-                        self.isCameraButtonDisabled = true
-                        self.isCameraUnavailable = true
-                        completion?()
+                if self.cameraSetupResult == .success {
+                    self.session.stopRunning()
+                    self.isSessionRunning = self.session.isRunning
+                    
+                    if !self.session.isRunning {
+                        DispatchQueue.main.async {
+                            self.isCameraButtonDisabled = true
+                            self.isCameraUnavailable = true
+                            completion?()
+                        }
                     }
                 }
             }
@@ -217,25 +260,137 @@ class CameraService: NSObject {
         }
     }
     
-    //FIXME: - vylepšit podle https://betterprogramming.pub/effortless-swiftui-camera-d7a74abde37e
+    //podle https://betterprogramming.pub/effortless-swiftui-camera-d7a74abde37e
     func capturePhoto(){
+        guard self.cameraSetupResult != .configurationFailed else {return}
+        self.isCameraButtonDisabled = true
         sessionQueue.async {
-            self.photoOutput.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
-            self.session.stopRunning()
+            if let photoOutputConnection = self.photoOutput.connection(with: .video) {
+                photoOutputConnection.videoOrientation = .portrait
+            }
+            var photoSettings = AVCapturePhotoSettings()
+            
+            // Capture HEIF photos when supported. Enable according to user settings and high-resolution photos.
+            if  self.photoOutput.availablePhotoCodecTypes.contains(.hevc) {
+                photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
+            }
+            
+            // Sets the flash option for this capture.
+            if let dev = self.deviceInput,
+               dev.device.isFlashAvailable {
+                photoSettings.flashMode = self.flashMode
+            }
+            
+            
+            // Sets the preview thumbnail pixel format
+            if !photoSettings.__availablePreviewPhotoPixelFormatTypes.isEmpty {
+                photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: photoSettings.__availablePreviewPhotoPixelFormatTypes.first!]
+            }
+            
+            
+            let photoCaptureProcessor = PhotoCaptureProcessor(with: photoSettings, completionHandler: { (photoCaptureProcessor) in
+                // When the capture is complete, remove a reference to the photo capture delegate so it can be deallocated.
+                if let data = photoCaptureProcessor.photoData {
+                    //self.photo = Photo(originalData: data)
+                    debugPrint(data.debugDescription)
+                    print("passing photo")
+                } else {
+                    print("No photo data")
+                }
+                
+                self.isCameraButtonDisabled = false
+                
+                self.sessionQueue.async {
+                    self.inProgressPhotoCaptureDelegates[photoCaptureProcessor.requestedPhotoSettings.uniqueID] = nil
+                }
+            }, photoProcessingHandler: { animate in
+                // Animates a spinner while photo is processing
+                if animate {
+                    self.shouldShowSpinner = true
+                } else {
+                    self.shouldShowSpinner = false
+                }
+            })
+            
+            // The photo output holds a weak reference to the photo capture delegate and stores it in an array to maintain a strong reference.
+            self.inProgressPhotoCaptureDelegates[photoCaptureProcessor.requestedPhotoSettings.uniqueID] = photoCaptureProcessor
+            self.photoOutput.capturePhoto(with: photoSettings, delegate: photoCaptureProcessor)
         }
     }
     
-    func savePic(photoData: Data){
-        guard let image = UIImage(data: photoData) else { return }
-        
-        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-    }
-    
-}
+    public func startVideoRecording() {
 
-extension CameraService: AVCapturePhotoCaptureDelegate {
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        guard let _ = error else { return }
-        guard let imageData = photo.fileDataRepresentation() else {return}
+//        guard sessionRunning == true else {
+//            print("[SwiftyCam]: Cannot start video recoding. Capture session is not running")
+//            return
+//        }
+
+
+        //Must be fetched before on main thread
+        //let previewOrientation = previewLayer.videoPreviewLayer.connection!.videoOrientation
+
+        sessionQueue.async { [unowned self] in
+            if !videoOutput.isRecording {
+                if UIDevice.current.isMultitaskingSupported {
+                    self.videoProcessor.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+                }
+
+                // Update the orientation on the movie file output video connection before starting recording.
+                let movieFileOutputConnection = self.videoOutput.connection(with: AVMediaType.video)
+
+
+                //flip video output if front facing camera is selected
+//                if self.currentCamera == .front {
+//                    movieFileOutputConnection?.isVideoMirrored = true
+//                }
+
+                //videoOutput?.videoOrientation = self.orientation.getVideoOrientation() ?? previewOrientation
+
+                // Start recording to a temporary file.
+                let outputFileName = UUID().uuidString
+                let outputFilePath = (self.outputFolder as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
+                videoOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: videoProcessor)
+                self.isVideoRecording = true
+            }
+            else {
+                videoOutput.stopRecording()
+            }
+        }
+    }
+
+    /**
+
+    Stop video recording video of current session
+
+    SwiftyCamViewControllerDelegate function SwiftyCamDidFinishRecordingVideo() will be called
+
+    When video has finished processing, the URL to the video location will be returned by SwiftyCamDidFinishProcessingVideoAt(url:)
+
+    */
+
+    public func stopVideoRecording() {
+        if self.isVideoRecording == true {
+            self.isVideoRecording = false
+            videoOutput.stopRecording()
+            //disableFlash()
+
+//            if currentCamera == .front && flashMode == .on && flashView != nil {
+//                UIView.animate(withDuration: 0.1, delay: 0.0, options: .curveEaseInOut, animations: {
+//                    self.flashView?.alpha = 0.0
+//                }, completion: { (_) in
+//                    self.flashView?.removeFromSuperview()
+//                })
+//            }
+//            DispatchQueue.main.async {
+//                self.cameraDelegate?.swiftyCam(self, didFinishRecordingVideo: self.currentCamera)
+//            }
+        }
+    }
+}
+extension CameraService {
+    enum SessionSetupResult {
+        case success
+        case notAuthorized
+        case configurationFailed
     }
 }

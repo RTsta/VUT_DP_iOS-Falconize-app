@@ -11,7 +11,9 @@ struct CameraView: View {
     @StateObject var cameraViewModel = CameraViewModel()
     @StateObject var posePredictor = PosePredictor()
     @State var currentZoomFactor: CGFloat = 1.0
-    @State var running : Bool = false
+    @State var recording : Bool = false
+    
+    @State var testOpacity = 0.5
     
     var body: some View {
         ZStack {
@@ -34,15 +36,33 @@ struct CameraView: View {
                     }))
             }
             VStack() {
+                ZStack{
+                    
+                    RoundedRectangle(cornerRadius: 44)
+                        .foregroundColor(.white)
+                        .opacity(testOpacity)
+                        .ignoresSafeArea()
+                        .onTapGesture { _ in
+                            testOpacity = (testOpacity > 0.5 ? 0.5 : 1.0)
+                        }
+                    PoseTextView(posePredictor: posePredictor)
+                    
+                }.frame(height: 100)
                 HStack() {
                     resetButton
                     Spacer()
                     switchButton
                     
                 }.padding([.trailing, .leading], 20)
-                PoseTextView(posePredictor: posePredictor)
+                
                 Spacer()
-                captureButton
+                ZStack{
+                    recordButton
+                    HStack{
+                        Spacer()
+                        captureButton
+                    }.padding()
+                }
             }
         }
         .onAppear{
@@ -68,20 +88,35 @@ struct CameraView: View {
     }
     
     
-    @ViewBuilder var captureButton: some View {
+    @ViewBuilder var recordButton: some View {
         Button(action: {
-            
+            (!recording ? cameraViewModel.startVideoRecording(): cameraViewModel.stopVideoRecording())
+            recording.toggle()
         }, label: {ZStack{
             Circle()
-                .foregroundColor(running ? Color.white : Color.red)
+                .foregroundColor(recording ? Color.red : Color.white)
                 .frame(width: 70, height: 70)
             
             Circle()
                 .stroke(Color.white, lineWidth: 2)
                 .frame(width: 80, height: 80)
             
-            (running ? Image(systemName: "pause.fill"): Image(systemName: "play.fill")).foregroundColor(Color.black)
+            (recording ? Image(systemName: "pause.fill"): Image(systemName: "play.fill")).foregroundColor(Color.black)
             
+        }})
+    }
+    
+    @ViewBuilder var captureButton: some View {
+        Button(action: {
+            cameraViewModel.capturePhoto()
+        }, label: {ZStack{
+            Circle()
+                .foregroundColor(Color.white)
+                .frame(width: 40, height: 40)
+            
+            Circle()
+                .stroke(Color.white, lineWidth: 2)
+                .frame(width: 50, height: 50)
         }})
     }
     
@@ -111,6 +146,9 @@ struct CameraView: View {
 
 struct CameraView_Previews: PreviewProvider {
     static var previews: some View {
-        CameraView()
+        ZStack{
+            Rectangle().foregroundColor(Color.black).scaledToFill().ignoresSafeArea()
+            CameraView()
+        }
     }
 }

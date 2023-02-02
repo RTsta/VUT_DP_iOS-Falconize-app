@@ -38,6 +38,14 @@ final class CameraViewModel: ObservableObject {
         service.capturePhoto()
     }
     
+    func startVideoRecording(){
+        service.startVideoRecording()
+    }
+    
+    func stopVideoRecording(){
+        service.stopVideoRecording()
+    }
+    
     func changeCamera(){
         service.changeCamera()
     }
