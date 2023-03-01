@@ -66,7 +66,7 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         }
     }
     
-    //MARK: Saves capture to photo library
+    // MARK: Saves capture to photo library
     func saveToPhotoLibrary(_ photoData: Data) {
         PHPhotoLibrary.requestAuthorization { status in
             if status == .authorized {
@@ -111,6 +111,6 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
             return
         }
         
-        //self.saveToPhotoLibrary(data)
+        self.saveToPhotoLibrary(data)
     }
 }

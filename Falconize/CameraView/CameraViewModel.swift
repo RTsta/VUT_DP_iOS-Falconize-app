@@ -18,10 +18,10 @@ final class CameraViewModel: ObservableObject {
     
     init() {
         self.session = service.session
-        //service.$photo.sink { [weak self] (photo) in
+        // service.$photo.sink { [weak self] (photo) in
         //    guard let pic = photo else { return }
         //    self?.photo = pic
-        //}.store(in: &self.subscriptions)
+        // }.store(in: &self.subscriptions)
         
         service.$flashMode.sink { [weak self] (mode) in
             self?.isFlashOn = mode == .on
@@ -38,15 +38,20 @@ final class CameraViewModel: ObservableObject {
         service.capturePhoto()
     }
     
-    func startVideoRecording(){
+    func startVideoRecording() {
         service.startVideoRecording()
     }
     
-    func stopVideoRecording(){
+    func stopVideoRecording() {
         service.stopVideoRecording()
     }
     
-    func changeCamera(){
+    func captureAction() {
+        service.captureAction()
+    }
+    
+    func changeCamera() {
+        myDebugPrint("changed camera")
         service.changeCamera()
     }
     
@@ -58,7 +63,7 @@ final class CameraViewModel: ObservableObject {
         service.flashMode = service.flashMode == .on ? .off : .on
     }
     
-    func addPoseDelegate(delegate: PosePredictor){
+    func addPoseDelegate(delegate: PosePredictor) {
         service.addOutputDelegate(delegate: delegate)
     }
 }

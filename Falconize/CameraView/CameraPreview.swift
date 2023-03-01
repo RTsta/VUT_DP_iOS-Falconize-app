@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 import SwiftUI
 
-struct CameraPreview : UIViewRepresentable {
+struct CameraPreview: UIViewRepresentable {
     class VideoPreviewView: UIView {
         override class var layerClass: AnyClass {
              AVCaptureVideoPreviewLayer.self
@@ -25,7 +25,7 @@ struct CameraPreview : UIViewRepresentable {
     
     func makeUIView(context: Context) -> VideoPreviewView {
         let view = VideoPreviewView()
-        //view.backgroundColor = .black
+        // view.backgroundColor = .black
         view.videoPreviewLayer.session = session
         view.videoPreviewLayer.videoGravity = .resizeAspectFill
         view.videoPreviewLayer.connection?.videoOrientation = .portrait

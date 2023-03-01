@@ -17,8 +17,8 @@ struct StickFigureView: View {
             var path = Path()
             path.move(to: points[0])
             
-            for point in points{
-                if (point.y == 0.0 || point.y == 1.0){
+            for point in points {
+                if point.y == 0.0 || point.y == 1.0 {
                     break
                 }
                 path.addLine(to: point)
@@ -33,46 +33,46 @@ struct StickFigureView: View {
     @ObservedObject var posePredictor: PosePredictor
     var size: CGSize
     var body: some View {
-        if posePredictor.bodyParts.isEmpty == false {
+        if let parts = posePredictor.bodyParts {
             ZStack {
                 // Right leg
-                Stick(points: [posePredictor.bodyParts[.rightAnkle]!.location,
-                               posePredictor.bodyParts[.rightKnee]!.location,
-                               posePredictor.bodyParts[.rightHip]!.location,
-                               posePredictor.bodyParts[.root]!.location],
+                Stick(points: [parts[.rightAnkle]!.location,
+                               parts[.rightKnee]!.location,
+                               parts[.rightHip]!.location,
+                               parts[.root]!.location],
                       size: size)
                 .stroke(lineWidth: 5.0)
                 .fill(Color.green)
                 
                 // Left leg
-                Stick(points: [posePredictor.bodyParts[.leftAnkle]!.location,
-                               posePredictor.bodyParts[.leftKnee]!.location,
-                               posePredictor.bodyParts[.leftHip]!.location,
-                               posePredictor.bodyParts[.root]!.location],
+                Stick(points: [parts[.leftAnkle]!.location,
+                               parts[.leftKnee]!.location,
+                               parts[.leftHip]!.location,
+                               parts[.root]!.location],
                       size: size)
                 .stroke(lineWidth: 5.0)
                 .fill(Color.green)
                 
                 // Right arm
-                Stick(points: [posePredictor.bodyParts[.rightWrist]!.location,
-                               posePredictor.bodyParts[.rightElbow]!.location,
-                               posePredictor.bodyParts[.rightShoulder]!.location,
-                               posePredictor.bodyParts[.neck]!.location],
+                Stick(points: [parts[.rightWrist]!.location,
+                               parts[.rightElbow]!.location,
+                               parts[.rightShoulder]!.location,
+                               parts[.neck]!.location],
                       size: size)
                     .stroke(lineWidth: 5.0)
                     .fill(Color.green)
                 // Left arm
-                Stick(points: [posePredictor.bodyParts[.leftWrist]!.location,
-                               posePredictor.bodyParts[.leftElbow]!.location,
-                               posePredictor.bodyParts[.leftShoulder]!.location,
-                               posePredictor.bodyParts[.neck]!.location],
+                Stick(points: [parts[.leftWrist]!.location,
+                               parts[.leftElbow]!.location,
+                               parts[.leftShoulder]!.location,
+                               parts[.neck]!.location],
                       size: size)
                     .stroke(lineWidth: 5.0)
                     .fill(Color.green)
                 // Root to nose
-                Stick(points: [posePredictor.bodyParts[.root]!.location,
-                               posePredictor.bodyParts[.neck]!.location,
-                               posePredictor.bodyParts[.nose]!.location],
+                Stick(points: [parts[.root]!.location,
+                               parts[.neck]!.location,
+                               parts[.nose]!.location],
                       size: size)
                 .stroke(lineWidth: 5.0)
                 .fill(Color.green)
@@ -83,6 +83,6 @@ struct StickFigureView: View {
 
 struct StickFigureView_Previews: PreviewProvider {
     static var previews: some View {
-        StickFigureView(posePredictor: PosePredictor() , size: CGSize(width: 100, height: 100))
+        StickFigureView(posePredictor: PosePredictor(), size: CGSize(width: 100, height: 100))
     }
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 import AVFoundation
-import UIKit//FIXME: do budoucna to tady nemá co dělat
+import UIKit // FIXME: do budoucna to tady nemá co dělat
 
 class CameraService: NSObject {
     
@@ -15,7 +15,7 @@ class CameraService: NSObject {
     @Published public var willCapturePhoto = false
     @Published public var isCameraButtonDisabled = true
     @Published public var isCameraUnavailable = true
-    @Published var deviceLensDirection : AVCaptureDevice.Position = .unspecified
+    @Published var deviceLensDirection: AVCaptureDevice.Position = .unspecified
     
     private var isConfigured = false
     private var isSessionRunning = false
@@ -26,8 +26,8 @@ class CameraService: NSObject {
     let sessionQueue = DispatchQueue(label: "CameraQueue", qos: .userInteractive)
     var session = AVCaptureSession()
     
-    //delegate for PosePredictor
-    var outputDelegates : [AVCaptureVideoDataOutputSampleBufferDelegate] = .init()
+    // delegate for PosePredictor
+    var outputDelegates: [AVCaptureVideoDataOutputSampleBufferDelegate] = .init()
     
     private var deviceInput: AVCaptureDeviceInput?
     @Published var photoOutput = AVCapturePhotoOutput()
@@ -38,14 +38,14 @@ class CameraService: NSObject {
     /// Video will be recorded to this folder
     public var outputFolder: String = NSTemporaryDirectory()
     
+    private var captureHistory: CaptureHistoryProcessor = CaptureHistoryProcessor()
     
     
     public func checkForPermissions() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
-            case .authorized:
+        case .authorized:
                 self.cameraSetupResult = .success
-                break
-            case .notDetermined:
+        case .notDetermined:
                 sessionQueue.suspend()
                 AVCaptureDevice.requestAccess(for: .video, completionHandler: { granted in
                     if !granted {
@@ -54,7 +54,7 @@ class CameraService: NSObject {
                     self.sessionQueue.resume()
                 })
                 
-            default:
+        default:
                 self.cameraSetupResult = .notAuthorized
                 self.isCameraUnavailable = true
                 self.isCameraButtonDisabled = true
@@ -68,16 +68,17 @@ class CameraService: NSObject {
         
         session.beginConfiguration()
         setupVideoInput()
-        //session.sessionPreset = .photo
+        // session.sessionPreset = .photo
         setupPhotoOutput()
         setupVideoOutput()
+        addHistoryBufferTest()
         
         session.commitConfiguration()
         self.isConfigured = true
         self.start()
     }
     
-    private func setupVideoInput(){
+    private func setupVideoInput() {
         var defaultVideoDevice: AVCaptureDevice? = AVCaptureDevice.default(for: .video)
         guard let videoDevice = defaultVideoDevice else {
             debugPrint("Default video device is unavailable.")
@@ -100,15 +101,15 @@ class CameraService: NSObject {
         }
     }
     
-    private func setupPhotoOutput(){
+    private func setupPhotoOutput() {
         if session.canAddOutput(photoOutput) {
             session.addOutput(photoOutput)
-            //photoOutput.maxPhotoDimensions =
-            //photoOutput.maxPhotoQualityPrioritization = .quality
+            // photoOutput.maxPhotoDimensions =
+            // photoOutput.maxPhotoQualityPrioritization = .quality
         }
     }
     
-    private func setupVideoOutput(){
+    private func setupVideoOutput() {
         if self.session.canAddOutput(videoOutput) {
             self.session.addOutput(videoOutput)
             if let connection = videoOutput.connection(with: AVMediaType.video) {
@@ -119,16 +120,35 @@ class CameraService: NSObject {
         }
     }
     
-    func addOutputDelegate(delegate: AVCaptureVideoDataOutputSampleBufferDelegate){
+    // FIXME: kdyžtak refactorovat a přemazat
+    func addHistoryBufferTest() {
         sessionQueue.async {
             self.session.beginConfiguration()
             let dataOutput = AVCaptureVideoDataOutput()
             if self.session.canAddOutput(dataOutput) {
                 self.session.addOutput(dataOutput)
+                dataOutput.setSampleBufferDelegate(self.captureHistory, queue: self.sessionQueue)
+                self.outputDelegates.append(self.captureHistory)
+            } else {
+                return
+                
+            }
+            self.session.commitConfiguration()
+        }
+    }
+    
+    func addOutputDelegate(delegate: AVCaptureVideoDataOutputSampleBufferDelegate) {
+        sessionQueue.async {
+            self.session.beginConfiguration()
+            let dataOutput = AVCaptureVideoDataOutput()
+            
+            if self.session.canAddOutput(dataOutput) {
+                self.session.addOutput(dataOutput)
                 dataOutput.setSampleBufferDelegate(delegate, queue: self.sessionQueue)
                 self.outputDelegates.append(delegate)
-                
-            } else { return }
+            } else {
+                return
+            }
             self.session.commitConfiguration()
         }
     }
@@ -159,7 +179,7 @@ class CameraService: NSObject {
         }
     }
     
-    public func stop(completion: (() -> ())? = nil) {
+    public func stop(completion: (() -> Void)? = nil) {
         sessionQueue.async {
             if self.isSessionRunning {
                 if self.cameraSetupResult == .success {
@@ -184,15 +204,17 @@ class CameraService: NSObject {
         }
         
         sessionQueue.async {
-            guard let deviceInput = self.deviceInput else {return}
+            guard let deviceInput = self.deviceInput else {
+                return
+            }
             let currentDevice = deviceInput.device
             let currentPosition = currentDevice.position
-            var newDevice : AVCaptureDevice? = nil
+            var newDevice: AVCaptureDevice?
             
             let backVideoDeviceDiscoverySession = AVCaptureDevice.default(for: .video)
             let frontVideoDeviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera], mediaType: .video, position: .front)
             
-            //nastavení nového vstupního zařízení
+            // nastavení nového vstupního zařízení
             switch currentPosition {
                 case .unspecified, .front:
                     newDevice = backVideoDeviceDiscoverySession
@@ -215,14 +237,14 @@ class CameraService: NSObject {
                         self.session.addInput(input)
                         self.deviceInput = input
                         DispatchQueue.main.async {
-                            self.outputDelegates.forEach{
+                            self.outputDelegates.forEach {
                                 if let posePredictor = $0 as? PosePredictor {
                                     posePredictor.cameraPosition = input.device.position
                                 }
                             }
                         }
                         
-                    }else{
+                    } else {
                         if let currentDeviceInput = self.deviceInput {
                             self.session.addInput(currentDeviceInput)
                         }
@@ -246,23 +268,26 @@ class CameraService: NSObject {
         }
     }
     
-    public func set(zoom: CGFloat){
+    public func set(zoom: CGFloat) {
         let factor = zoom < 1 ? 1 : zoom
-        guard let device = deviceInput?.device else { return }
+        guard let device = deviceInput?.device else {
+            return
+        }
         
         do {
             try device.lockForConfiguration()
             device.videoZoomFactor = factor
             device.unlockForConfiguration()
-        }
-        catch {
+        } catch {
             print(error.localizedDescription)
         }
     }
     
-    //podle https://betterprogramming.pub/effortless-swiftui-camera-d7a74abde37e
-    func capturePhoto(){
-        guard self.cameraSetupResult != .configurationFailed else {return}
+    // podle https://betterprogramming.pub/effortless-swiftui-camera-d7a74abde37e
+    func capturePhoto() {
+        guard self.cameraSetupResult != .configurationFailed else {
+            return
+        }
         self.isCameraButtonDisabled = true
         sessionQueue.async {
             if let photoOutputConnection = self.photoOutput.connection(with: .video) {
@@ -271,7 +296,7 @@ class CameraService: NSObject {
             var photoSettings = AVCapturePhotoSettings()
             
             // Capture HEIF photos when supported. Enable according to user settings and high-resolution photos.
-            if  self.photoOutput.availablePhotoCodecTypes.contains(.hevc) {
+            if self.photoOutput.availablePhotoCodecTypes.contains(.hevc) {
                 photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
             }
             
@@ -291,11 +316,11 @@ class CameraService: NSObject {
             let photoCaptureProcessor = PhotoCaptureProcessor(with: photoSettings, completionHandler: { (photoCaptureProcessor) in
                 // When the capture is complete, remove a reference to the photo capture delegate so it can be deallocated.
                 if let data = photoCaptureProcessor.photoData {
-                    //self.photo = Photo(originalData: data)
+                    // self.photo = Photo(originalData: data)
                     debugPrint(data.debugDescription)
-                    print("passing photo")
+                    myDebugPrint("passing photo")
                 } else {
-                    print("No photo data")
+                    myDebugPrint("No photo data")
                 }
                 
                 self.isCameraButtonDisabled = false
@@ -319,71 +344,66 @@ class CameraService: NSObject {
     }
     
     public func startVideoRecording() {
-
-//        guard sessionRunning == true else {
-//            print("[SwiftyCam]: Cannot start video recoding. Capture session is not running")
-//            return
-//        }
-
-
-        //Must be fetched before on main thread
-        //let previewOrientation = previewLayer.videoPreviewLayer.connection!.videoOrientation
-
+        
+        //        guard sessionRunning == true else {
+        //            print("[SwiftyCam]: Cannot start video recoding. Capture session is not running")
+        //            return
+        //        }
+        
+        
+        // Must be fetched before on main thread
+        // let previewOrientation = previewLayer.videoPreviewLayer.connection!.videoOrientation
+        
         sessionQueue.async { [unowned self] in
             if !videoOutput.isRecording {
                 if UIDevice.current.isMultitaskingSupported {
                     self.videoProcessor.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
                 }
-
+                
                 // Update the orientation on the movie file output video connection before starting recording.
                 let movieFileOutputConnection = self.videoOutput.connection(with: AVMediaType.video)
-
-
-                //flip video output if front facing camera is selected
-//                if self.currentCamera == .front {
-//                    movieFileOutputConnection?.isVideoMirrored = true
-//                }
-
-                //videoOutput?.videoOrientation = self.orientation.getVideoOrientation() ?? previewOrientation
-
+                
+                
+                // flip video output if front facing camera is selected
+                //                if self.currentCamera == .front {
+                //                    movieFileOutputConnection?.isVideoMirrored = true
+                //                }
+                
+                // videoOutput?.videoOrientation = self.orientation.getVideoOrientation() ?? previewOrientation
+                
                 // Start recording to a temporary file.
                 let outputFileName = UUID().uuidString
                 let outputFilePath = (self.outputFolder as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
                 videoOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: videoProcessor)
                 self.isVideoRecording = true
-            }
-            else {
+            } else {
                 videoOutput.stopRecording()
             }
         }
     }
-
-    /**
-
-    Stop video recording video of current session
-
-    SwiftyCamViewControllerDelegate function SwiftyCamDidFinishRecordingVideo() will be called
-
-    When video has finished processing, the URL to the video location will be returned by SwiftyCamDidFinishProcessingVideoAt(url:)
-
-    */
-
+    
     public func stopVideoRecording() {
         if self.isVideoRecording == true {
             self.isVideoRecording = false
             videoOutput.stopRecording()
-            //disableFlash()
-
-//            if currentCamera == .front && flashMode == .on && flashView != nil {
-//                UIView.animate(withDuration: 0.1, delay: 0.0, options: .curveEaseInOut, animations: {
-//                    self.flashView?.alpha = 0.0
-//                }, completion: { (_) in
-//                    self.flashView?.removeFromSuperview()
-//                })
-//            }
-//            DispatchQueue.main.async {
-//                self.cameraDelegate?.swiftyCam(self, didFinishRecordingVideo: self.currentCamera)
-//            }
+            // disableFlash()
+            
+            //            if currentCamera == .front && flashMode == .on && flashView != nil {
+            //                UIView.animate(withDuration: 0.1, delay: 0.0, options: .curveEaseInOut, animations: {
+            //                    self.flashView?.alpha = 0.0
+            //                }, completion: { (_) in
+            //                    self.flashView?.removeFromSuperview()
+            //                })
+            //            }
+            //            DispatchQueue.main.async {
+            //                self.cameraDelegate?.swiftyCam(self, didFinishRecordingVideo: self.currentCamera)
+            //            }
+        }
+    }
+    
+    public func captureAction() {
+        Task {
+            await captureHistory.testAction()
         }
     }
 }

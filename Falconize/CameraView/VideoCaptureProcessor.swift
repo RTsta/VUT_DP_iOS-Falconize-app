@@ -19,12 +19,10 @@ class VideoCaptureProcessor: NSObject {
         autoreleaseFrequency: .workItem)
     
     var backgroundRecordingID: UIBackgroundTaskIdentifier?
-    
-    
-    
 }
 
-extension VideoCaptureProcessor: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureFileOutputRecordingDelegate {
+// MARK: - AVCaptureFileOutputRecordingDelegate
+extension VideoCaptureProcessor : AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         func cleanup() {
             let path = outputFileURL.path
@@ -64,7 +62,7 @@ extension VideoCaptureProcessor: AVCaptureVideoDataOutputSampleBufferDelegate, A
                         creationRequest.addResource(with: .video, fileURL: outputFileURL, options: options)
                         
                         // Specify the location the movie was recoreded
-                        //creationRequest.location = self.locationManager.location
+                        // creationRequest.location = self.locationManager.location
                     }, completionHandler: { success, error in
                         if !success {
                             print("AVCam couldn't save the movie to your photo library: \(String(describing: error))")
@@ -81,6 +79,26 @@ extension VideoCaptureProcessor: AVCaptureVideoDataOutputSampleBufferDelegate, A
         }
     }
     
+    private func saveInPhotoLibrary(_ url:URL){
+        PHPhotoLibrary.shared().performChanges({
+            //add video to PhotoLibrary here
+            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+        }) { completed, error in
+            if completed {
+                print("save complete! path : " + url.absoluteString)
+                return
+            }else{
+                print("save failed")
+                return
+            }
+        }
+    }
+    
+    }
+
+
+// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+extension VideoCaptureProcessor : AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         return
     }

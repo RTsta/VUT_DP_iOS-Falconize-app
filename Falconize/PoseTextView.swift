@@ -11,10 +11,10 @@ struct PoseTextView: View {
     @ObservedObject var posePredictor: PosePredictor
     
     var body: some View {
-        if posePredictor.bodyParts.isEmpty == false {
+        if let parts = posePredictor.bodyParts {
             VStack {
-                Text("Right x:\(posePredictor.bodyParts[.rightWrist]!.location.x) y:\(posePredictor.bodyParts[.rightWrist]!.location.y)")
-                Text("Left x:\(posePredictor.bodyParts[.leftWrist]!.location.x) y:\(posePredictor.bodyParts[.leftWrist]!.location.y)")
+                Text("Right x:\(parts[.rightWrist]!.location.x) y:\(parts[.rightWrist]!.location.y)")
+                Text("Left x:\(parts[.leftWrist]!.location.x) y:\(parts[.leftWrist]!.location.y)")
                 Text("Actions: \(posePredictor.actionCount)")
             }
         }

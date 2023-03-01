@@ -20,6 +20,8 @@
 		8FC3CF9B28E5CD2E009917F4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */; };
 		8FCD220B2989B74B00B5571C /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCD220A2989B74B00B5571C /* PhotoCaptureProcessor.swift */; };
 		8FEB5375298AB39C00BBB854 /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEB5374298AB39C00BBB854 /* VideoCaptureProcessor.swift */; };
+		8FEB5377298C7DAA00BBB854 /* CaptureHistoryProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEB5376298C7DAA00BBB854 /* CaptureHistoryProcessor.swift */; };
+		8FEB53792991C9CE00BBB854 /* myUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEB53782991C9CE00BBB854 /* myUtil.swift */; };
 		8FF2526D29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 8FF2526C29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel */; };
 		8FF252752918845000BFA014 /* PosePredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF252742918845000BFA014 /* PosePredictor.swift */; };
 /* End PBXBuildFile section */
@@ -40,6 +42,8 @@
 		8FCD220929897EB800B5571C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8FCD220A2989B74B00B5571C /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
 		8FEB5374298AB39C00BBB854 /* VideoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCaptureProcessor.swift; sourceTree = "<group>"; };
+		8FEB5376298C7DAA00BBB854 /* CaptureHistoryProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureHistoryProcessor.swift; sourceTree = "<group>"; };
+		8FEB53782991C9CE00BBB854 /* myUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = myUtil.swift; sourceTree = "<group>"; };
 		8FF2526C29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = "FewMovementsClasifier 2.mlmodel"; sourceTree = "<group>"; };
 		8FF252742918845000BFA014 /* PosePredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PosePredictor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -60,6 +64,7 @@
 			children = (
 				8FB81DA8292EAFB000AA73FD /* CameraView.swift */,
 				8FB81DBE29316C1200AA73FD /* CameraViewModel.swift */,
+				8FEB5376298C7DAA00BBB854 /* CaptureHistoryProcessor.swift */,
 				8FB81DBB29315A4000AA73FD /* CameraService.swift */,
 				8FCD220A2989B74B00B5571C /* PhotoCaptureProcessor.swift */,
 				8FEB5374298AB39C00BBB854 /* VideoCaptureProcessor.swift */,
@@ -92,6 +97,7 @@
 				8FB81DAA2930166200AA73FD /* AppDelegate.swift */,
 				8FC3CF9528E5CD2D009917F4 /* ContentView.swift */,
 				8F5D3776291A9FA50073F105 /* StickFigureView.swift */,
+				8FEB53782991C9CE00BBB854 /* myUtil.swift */,
 				8FB81DB92930374900AA73FD /* PoseTextView.swift */,
 				8FF252742918845000BFA014 /* PosePredictor.swift */,
 				8FB81DBD29316BDD00AA73FD /* CameraView */,
@@ -120,6 +126,7 @@
 				8FC3CF8C28E5CD2D009917F4 /* Sources */,
 				8FC3CF8D28E5CD2D009917F4 /* Frameworks */,
 				8FC3CF8E28E5CD2D009917F4 /* Resources */,
+				8FEB537B2992D05600BBB854 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -154,6 +161,8 @@
 				Base,
 			);
 			mainGroup = 8FC3CF8728E5CD2D009917F4;
+			packageReferences = (
+			);
 			productRefGroup = 8FC3CF9128E5CD2D009917F4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -175,6 +184,26 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		8FEB537B2992D05600BBB854 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#export PATH=\"$PATH:/opt/homebrew/bin\"\n#if which swiftlint > /dev/null; then\n#  swiftlint\n#else\n#  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\n#fi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		8FC3CF8C28E5CD2D009917F4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -182,9 +211,11 @@
 			files = (
 				8FB81DA9292EAFB000AA73FD /* CameraView.swift in Sources */,
 				8F5D3777291A9FA50073F105 /* StickFigureView.swift in Sources */,
+				8FEB5377298C7DAA00BBB854 /* CaptureHistoryProcessor.swift in Sources */,
 				8FB81DBC29315A4000AA73FD /* CameraService.swift in Sources */,
 				8FB81DBF29316C1200AA73FD /* CameraViewModel.swift in Sources */,
 				8FB81DBA2930374900AA73FD /* PoseTextView.swift in Sources */,
+				8FEB53792991C9CE00BBB854 /* myUtil.swift in Sources */,
 				8FB81DC129316EFB00AA73FD /* CameraPreview.swift in Sources */,
 				8FB81DAB2930166200AA73FD /* AppDelegate.swift in Sources */,
 				8FC3CF9628E5CD2D009917F4 /* ContentView.swift in Sources */,
