@@ -25,6 +25,10 @@ func myDebugPrint(_ something: Any, _ title: String = "",onScreen: Bool = false)
     }
 }
 
+func myErrorPrint(_ something: Any) {
+    print("!!! Error !!! \(something)")
+}
+
 func testButton() -> some View{
     Button("Test"){
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first

@@ -38,7 +38,7 @@ class CameraService: NSObject {
     /// Video will be recorded to this folder
     public var outputFolder: String = NSTemporaryDirectory()
     
-    private var captureHistory: CaptureHistoryProcessor = CaptureHistoryProcessor()
+    private var captureHistory: CaptureHistoryProcessor = CaptureHistoryProcessor(videoSettings: .init(width: 1920, height: 1080, codec: .hevc, fileType: .mov, frameRate: 30))
     
     
     public func checkForPermissions() {
