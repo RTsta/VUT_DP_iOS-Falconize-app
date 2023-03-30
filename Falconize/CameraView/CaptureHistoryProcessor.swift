@@ -7,54 +7,30 @@
 
 import Foundation
 import AVFoundation
+import Photos
 import UIKit
 
-import Photos
-
 class CaptureHistoryProcessor: NSObject {
-    struct VideoSettings {
-        let width: Int
-        let height: Int
-        let codec: AVVideoCodecType
-        let fileType: AVFileType
-        let frameRate: CMTimeScale
-        init(width: Int, height: Int, codec: AVVideoCodecType, fileType: AVFileType, frameRate: Int) {
-            self.width = width
-            self.height = height
-            self.codec = codec
-            self.fileType = fileType
-            self.frameRate = CMTimeScale(frameRate)
-        }
-        
-        func fileTypeExtension() -> String {
-            switch self.fileType {
-                case .mov:
-                    return "mov"
-                default:
-                    return ""
-            }
-        }
-    }
-    
-    private let fileManager : FileManager = FileManager.default
-    private lazy var chunksDirURL : URL = {
+    private let fileManager: FileManager = FileManager.default
+    private lazy var chunksDirURL: URL = {
         let url = URL.documentsDirectory.appending(path: "videoChunks")
         try? fileManager.removeItem(at: url)
         try? fileManager.createDirectory(at: url, withIntermediateDirectories: true)
         
         return url
     }()
+    @Published var isReady: Bool = false
     
-    private var totalNumberOfChunks : Int = 20
-    private var chunkDuration : Double = 1 // seconds
+    private var totalNumberOfChunks: Int = 20
+    private var chunkDuration: Double = 1 // seconds
 
-    private var assetWriter : AVAssetWriter?
-    private var assetWriterInput : AVAssetWriterInput?
+    private var assetWriter: AVAssetWriter?
+    private var assetWriterInput: AVAssetWriterInput?
     
-    private var chunkNumber : Int = 0
+    private var chunkNumber: Int = 0
     private var chunkStartTime: CMTime?
     
-    private var videoSettings : VideoSettings
+    private var videoSettings: VideoSettings
     
     enum CaptureHistoryError: Error {
         case runtimeError(String)
@@ -65,10 +41,14 @@ class CaptureHistoryProcessor: NSObject {
         self.videoSettings = videoSettings
         super.init()
     }
+    
+    func changeSettings(newSettings: VideoSettings){
+        self.videoSettings = newSettings
+    }
 }
 
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
-extension CaptureHistoryProcessor : AVCaptureVideoDataOutputSampleBufferDelegate {
+extension CaptureHistoryProcessor: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
             createVideoOutput(from: sampleBuffer)
         
@@ -99,13 +79,13 @@ extension CaptureHistoryProcessor {
         }
         
         if let assetWriterInput = assetWriterInput, assetWriterInput.isReadyForMoreMediaData {
-            if !assetWriterInput.append(buffer){
+            if !assetWriterInput.append(buffer) {
                 myErrorPrint("\(String(describing: self )).\(#function) - Error appending assetWriterInput")
             }
         }
     }
         
-    private func createWriterInput(at startTime : CMTime) {
+    private func createWriterInput(at startTime: CMTime) {
         print("Start recoriding: \(chunkNumber)")
         let chunkOutputURL = chunksDirURL.appending(component: "chunk\(String(format: "%02d", chunkNumber)).\(videoSettings.fileTypeExtension())")
         try? fileManager.removeItem(at: chunkOutputURL)
@@ -118,9 +98,20 @@ extension CaptureHistoryProcessor {
             
         assetWriter.shouldOptimizeForNetworkUse = true
         
-        let outputSettings : [String : Any] = [AVVideoCodecKey : videoSettings.codec,
-                                                AVVideoWidthKey: videoSettings.width,
-                                               AVVideoHeightKey: videoSettings.height]
+        var bitsPerPixel : CGFloat = 10.1 // This bitrate approximately matches the quality produced by AVCaptureSessionPresetHigh.
+        if self.videoSettings.value.dimensions().width * self.videoSettings.value.dimensions().height < 640 * 480 {
+            bitsPerPixel = 4.05; // This bitrate approximately matches the quality produced by AVCaptureSessionPresetMedium or Low.
+        }
+        
+        
+        let outputSettings: [String: Any] = [ AVVideoCodecKey: videoSettings.codec,
+                                              AVVideoWidthKey: videoSettings.value.dimensions().width,
+                                              AVVideoHeightKey: videoSettings.value.dimensions().height,
+                              AVVideoCompressionPropertiesKey: [ AVVideoAverageBitRateKey : CGFloat(self.videoSettings.value.dimensions().width) * CGFloat(self.videoSettings.value.dimensions().height) * bitsPerPixel,
+                                                                              AVVideoExpectedSourceFrameRateKey : self.videoSettings.value.fps(),
+                                                                                  AVVideoMaxKeyFrameIntervalKey : self.videoSettings.value.fps()
+                                                               ]
+                                              ]
         
         assetWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: outputSettings)
         guard let assetWriterInput = assetWriterInput else {
@@ -133,6 +124,10 @@ extension CaptureHistoryProcessor {
         chunkNumber = (chunkNumber + 1) % totalNumberOfChunks
         chunkStartTime = startTime
         
+        if !isReady && chunkNumber > 4 {
+            isReady = true
+        }
+        
         assetWriter.startWriting()
         assetWriter.startSession(atSourceTime: startTime)
     }
@@ -140,8 +135,8 @@ extension CaptureHistoryProcessor {
 
 // MARK: - AVMutableComposition
 extension CaptureHistoryProcessor {
-    private func mergeVideos(videoURLs : [URL]) async throws{
-        if videoURLs.isEmpty { return }
+    private func mergeVideos(videoURLs: [URL]) async throws {
+        if (videoURLs.isEmpty) { return }
         
         let composition = AVMutableComposition()
         guard let compositionTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) //vytvoří novou stopu v kompozici (composition)
@@ -149,8 +144,9 @@ extension CaptureHistoryProcessor {
             throw CaptureHistoryError.runtimeError("\(String(describing: self )).\(#function) - Unable to create compositionTrack")
         }
         
-        var assetTrack : AVAssetTrack?
-        var previusTrackTime : CMTime = .zero
+        let orientation = await UIDevice.current.orientation
+        var assetTrack: AVAssetTrack?
+        var previusTrackTime: CMTime = .zero
         for videoURL in videoURLs {
             let asset = AVURLAsset(url: videoURL)
             
@@ -175,23 +171,19 @@ extension CaptureHistoryProcessor {
         else {
             throw CaptureHistoryError.runtimeError("\(String(describing: self )).\(#function) - Something is wrong with the asset.")
         }
-        
         let videoComposition = AVMutableVideoComposition()
-        do {
-            videoComposition.renderSize = try await assetTrack.load(.naturalSize)
-        } catch {
-            throw error
-        }
-        videoComposition.frameDuration = CMTime(value: 1, timescale: videoSettings.frameRate)
         
+        videoComposition.frameDuration = CMTime(value: 1, timescale: videoSettings.frameRate)
         let instruction = AVMutableVideoCompositionInstruction()
-        instruction.timeRange = CMTimeRange(start: .zero,duration: previusTrackTime)
+        instruction.timeRange = CMTimeRange(start: .zero, duration: previusTrackTime)
         videoComposition.instructions = [instruction]
         
         let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionTrack)
         do {
-            let transform = try await assetTrack.load(.preferredTransform)
-            layerInstruction.setTransform(transform, at: .zero)
+            let x = outputFinalSizeAndRotation(size: try await assetTrack.load(.naturalSize),
+                                  transform: try await assetTrack.load(.preferredTransform))
+            videoComposition.renderSize = x.size
+            layerInstruction.setTransform(x.transform, at: .zero)
             instruction.layerInstructions = [layerInstruction]
         } catch {
             throw error
@@ -204,7 +196,22 @@ extension CaptureHistoryProcessor {
         }
     }
     
-    private func exportVideo(asset: AVAsset, videoComposition: AVVideoComposition ) async -> URL?{
+    private func outputFinalSizeAndRotation(size: CGSize, transform: CGAffineTransform) -> (size: CGSize, transform: CGAffineTransform) {
+        let deviceOrientation = UIDevice.current.orientation
+        if deviceOrientation == .portrait && size.width > size.height {
+            return (CGSize(width: size.height, height: size.width),
+                    transform.translatedBy(x: size.height, y: 0).rotated(by: .pi/2))
+        }else if deviceOrientation == .portraitUpsideDown && size.width > size.height {
+            return  (CGSize(width: size.height, height: size.width),
+                     transform.translatedBy(x: 0, y: size.width).rotated(by: .pi * 1.5))
+        }else if deviceOrientation == .landscapeRight{
+            return (size, transform.translatedBy(x: size.width, y: size.height).rotated(by: .pi))
+        } else {
+            return (size, transform)
+        }
+    }
+    
+    private func exportVideo(asset: AVAsset, videoComposition: AVVideoComposition ) async -> URL? {
         guard let export = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)
         else {
             myErrorPrint("\(String(describing: self )).\(#function) - Cannot create export session.")
@@ -214,11 +221,10 @@ extension CaptureHistoryProcessor {
         let exportURL = URL.temporaryDirectory
             .appendingPathComponent(videoName)
             .appendingPathExtension(videoSettings.fileTypeExtension())
-            
         export.videoComposition = videoComposition
         export.outputFileType = videoSettings.fileType
         export.outputURL = exportURL
-            
+        
         await export.export()
         
         switch export.status {
@@ -226,7 +232,6 @@ extension CaptureHistoryProcessor {
                 return exportURL
             default:
                 myErrorPrint("\(String(describing: self )).\(#function) - Something went wrong during export - \(export.error?.localizedDescription ?? "")")
-                break
         }
         return nil
     }
@@ -250,17 +255,17 @@ extension CaptureHistoryProcessor {
         }
     }
     
+    //TODO: rename
     func testAction() async {
-        guard let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
-        Task{
+        Task {
             print("AKCE v framu \(chunkNumber)")
             let currentChunkNumber = chunkNumber
 
-            try await Task.sleep(for:Duration.milliseconds(3010))
+            try await Task.sleep(for: Duration.milliseconds(3010))
             guard let contents = try? fileManager.contentsOfDirectory(at: chunksDirURL, includingPropertiesForKeys: nil)
-                .sorted(by: {
-                    $0.deletingPathExtension().lastPathComponent < $1.deletingPathExtension().lastPathComponent
-                }).filter({$0.pathExtension == "mov"}) else { return }
+                .sorted(by: { $0.deletingPathExtension().lastPathComponent < $1.deletingPathExtension().lastPathComponent })
+                .filter({ $0.pathExtension == "mov" })
+            else { return }
             
             try? await mergeVideos(videoURLs: [contents[chunkNumberIndexing(for: currentChunkNumber-4)],
                                           contents[chunkNumberIndexing(for: currentChunkNumber-3)],
@@ -275,8 +280,7 @@ extension CaptureHistoryProcessor {
     private func chunkNumberIndexing(for index: Int) -> Int {
         if index >= 0 {
             return index % totalNumberOfChunks
-        }
-        else {
+        } else {
             return (totalNumberOfChunks + index) % totalNumberOfChunks
         }
     }

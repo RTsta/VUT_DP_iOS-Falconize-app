@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F377AAE29D4CFB900475615 /* FocusPointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F377AAD29D4CFB900475615 /* FocusPointView.swift */; };
 		8F5D3777291A9FA50073F105 /* StickFigureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5D3776291A9FA50073F105 /* StickFigureView.swift */; };
 		8FB81DA9292EAFB000AA73FD /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA8292EAFB000AA73FD /* CameraView.swift */; };
 		8FB81DAB2930166200AA73FD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DAA2930166200AA73FD /* AppDelegate.swift */; };
@@ -19,6 +20,8 @@
 		8FC3CF9828E5CD2E009917F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9728E5CD2E009917F4 /* Assets.xcassets */; };
 		8FC3CF9B28E5CD2E009917F4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */; };
 		8FCD220B2989B74B00B5571C /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCD220A2989B74B00B5571C /* PhotoCaptureProcessor.swift */; };
+		8FD7081329BA832200857334 /* SwitchLensButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD7081229BA832100857334 /* SwitchLensButtons.swift */; };
+		8FD7082F29BB482800857334 /* CaptureDevicePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD7082E29BB482700857334 /* CaptureDevicePreset.swift */; };
 		8FEB5375298AB39C00BBB854 /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEB5374298AB39C00BBB854 /* VideoCaptureProcessor.swift */; };
 		8FEB5377298C7DAA00BBB854 /* CaptureHistoryProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEB5376298C7DAA00BBB854 /* CaptureHistoryProcessor.swift */; };
 		8FEB53792991C9CE00BBB854 /* myUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEB53782991C9CE00BBB854 /* myUtil.swift */; };
@@ -27,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8F377AAD29D4CFB900475615 /* FocusPointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPointView.swift; sourceTree = "<group>"; };
 		8F5D3776291A9FA50073F105 /* StickFigureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickFigureView.swift; sourceTree = "<group>"; };
 		8FB81DA8292EAFB000AA73FD /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		8FB81DAA2930166200AA73FD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -41,6 +45,8 @@
 		8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8FCD220929897EB800B5571C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8FCD220A2989B74B00B5571C /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
+		8FD7081229BA832100857334 /* SwitchLensButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchLensButtons.swift; sourceTree = "<group>"; };
+		8FD7082E29BB482700857334 /* CaptureDevicePreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDevicePreset.swift; sourceTree = "<group>"; };
 		8FEB5374298AB39C00BBB854 /* VideoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCaptureProcessor.swift; sourceTree = "<group>"; };
 		8FEB5376298C7DAA00BBB854 /* CaptureHistoryProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureHistoryProcessor.swift; sourceTree = "<group>"; };
 		8FEB53782991C9CE00BBB854 /* myUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = myUtil.swift; sourceTree = "<group>"; };
@@ -63,9 +69,12 @@
 			isa = PBXGroup;
 			children = (
 				8FB81DA8292EAFB000AA73FD /* CameraView.swift */,
+				8F377AAD29D4CFB900475615 /* FocusPointView.swift */,
+				8FD7081229BA832100857334 /* SwitchLensButtons.swift */,
 				8FB81DBE29316C1200AA73FD /* CameraViewModel.swift */,
 				8FEB5376298C7DAA00BBB854 /* CaptureHistoryProcessor.swift */,
 				8FB81DBB29315A4000AA73FD /* CameraService.swift */,
+				8FD7082E29BB482700857334 /* CaptureDevicePreset.swift */,
 				8FCD220A2989B74B00B5571C /* PhotoCaptureProcessor.swift */,
 				8FEB5374298AB39C00BBB854 /* VideoCaptureProcessor.swift */,
 				8FB81DC029316EFB00AA73FD /* CameraPreview.swift */,
@@ -210,6 +219,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8FB81DA9292EAFB000AA73FD /* CameraView.swift in Sources */,
+				8FD7082F29BB482800857334 /* CaptureDevicePreset.swift in Sources */,
 				8F5D3777291A9FA50073F105 /* StickFigureView.swift in Sources */,
 				8FEB5377298C7DAA00BBB854 /* CaptureHistoryProcessor.swift in Sources */,
 				8FB81DBC29315A4000AA73FD /* CameraService.swift in Sources */,
@@ -218,12 +228,14 @@
 				8FEB53792991C9CE00BBB854 /* myUtil.swift in Sources */,
 				8FB81DC129316EFB00AA73FD /* CameraPreview.swift in Sources */,
 				8FB81DAB2930166200AA73FD /* AppDelegate.swift in Sources */,
+				8F377AAE29D4CFB900475615 /* FocusPointView.swift in Sources */,
 				8FC3CF9628E5CD2D009917F4 /* ContentView.swift in Sources */,
 				8FC3CF9428E5CD2D009917F4 /* FalconizeApp.swift in Sources */,
 				8FCD220B2989B74B00B5571C /* PhotoCaptureProcessor.swift in Sources */,
 				8FF252752918845000BFA014 /* PosePredictor.swift in Sources */,
 				8FF2526D29187E0500BFA014 /* FewMovementsClasifier 2.mlmodel in Sources */,
 				8FEB5375298AB39C00BBB854 /* VideoCaptureProcessor.swift in Sources */,
+				8FD7081329BA832200857334 /* SwitchLensButtons.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,6 +368,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Falconize/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_NSCameraUsageDescription = "For testing puroses";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Saving images from camera roll to gallery";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -390,6 +403,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Falconize/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_NSCameraUsageDescription = "For testing puroses";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Saving images from camera roll to gallery";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

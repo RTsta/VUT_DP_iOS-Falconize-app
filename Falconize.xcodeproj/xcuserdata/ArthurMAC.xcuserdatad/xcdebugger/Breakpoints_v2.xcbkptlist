@@ -338,5 +338,85 @@
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "057EC845-6B4D-4D79-9A22-10ECA6ECCC5B"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Falconize/CameraView/CameraService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "614"
+            endingLineNumber = "614"
+            landmarkName = "changeFrameRate(toFPS:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "057EC845-6B4D-4D79-9A22-10ECA6ECCC5B - 9b4e6492d582d0a4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "__C.AVCaptureDevice.changeFrameRate(toFPS: Swift.Double) -&gt; ()"
+                  moduleName = "Falconize"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ArthurMAC/xcode/Falconize/Falconize/CameraView/CameraService.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "624"
+                  endingLineNumber = "624"
+                  offsetFromSymbolStart = "340">
+               </Location>
+               <Location
+                  uuid = "057EC845-6B4D-4D79-9A22-10ECA6ECCC5B - 9b4e6492d582d0a4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "__C.AVCaptureDevice.changeFrameRate(toFPS: Swift.Double) -&gt; ()"
+                  moduleName = "Falconize"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ArthurMAC/xcode/Falconize/Falconize/CameraView/CameraService.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "624"
+                  endingLineNumber = "624"
+                  offsetFromSymbolStart = "368">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D247ABE8-CB6D-4A5E-BEB5-012B64807D62"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Falconize/CameraView/CameraService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "278"
+            endingLineNumber = "278"
+            landmarkName = "changeDevice(for:withFPS:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CB6BEE20-20DE-45CD-A316-04B9700773D0"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Falconize/CameraView/CameraService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "362"
+            endingLineNumber = "362"
+            landmarkName = "focus(at:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

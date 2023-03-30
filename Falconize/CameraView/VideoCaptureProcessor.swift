@@ -22,7 +22,7 @@ class VideoCaptureProcessor: NSObject {
 }
 
 // MARK: - AVCaptureFileOutputRecordingDelegate
-extension VideoCaptureProcessor : AVCaptureFileOutputRecordingDelegate {
+extension VideoCaptureProcessor: AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         func cleanup() {
             let path = outputFileURL.path
@@ -79,15 +79,15 @@ extension VideoCaptureProcessor : AVCaptureFileOutputRecordingDelegate {
         }
     }
     
-    private func saveInPhotoLibrary(_ url:URL){
+    private func saveInPhotoLibrary(_ url: URL) {
         PHPhotoLibrary.shared().performChanges({
-            //add video to PhotoLibrary here
+            // add video to PhotoLibrary here
             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
         }) { completed, error in
             if completed {
                 print("save complete! path : " + url.absoluteString)
                 return
-            }else{
+            } else {
                 print("save failed")
                 return
             }
@@ -98,7 +98,7 @@ extension VideoCaptureProcessor : AVCaptureFileOutputRecordingDelegate {
 
 
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
-extension VideoCaptureProcessor : AVCaptureVideoDataOutputSampleBufferDelegate {
+extension VideoCaptureProcessor: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         return
     }

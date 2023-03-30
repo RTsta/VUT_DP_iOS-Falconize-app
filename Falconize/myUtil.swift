@@ -12,7 +12,7 @@ extension Notification.Name {
     static let myDebugPrintNotification = Notification.Name("myDebugPrintNotification")
 }
 
-func myDebugPrint(_ something: Any, _ title: String = "",onScreen: Bool = false) {
+func myDebugPrint(_ something: Any, _ title: String = "", onScreen: Bool = false) {
     print("*********** \(title) ***********")
     print("\(something)")
     var final = ""
@@ -29,10 +29,10 @@ func myErrorPrint(_ something: Any) {
     print("!!! Error !!! \(something)")
 }
 
-func testButton() -> some View{
-    Button("Test"){
+func testButton() -> some View {
+    Button("Test") {
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        print(try? FileManager.default.contentsOfDirectory(at: url!, includingPropertiesForKeys: nil))
+        print(try? FileManager.default.contentsOfDirectory(at: url!, includingPropertiesForKeys: nil) as Any)
     }
 }
 

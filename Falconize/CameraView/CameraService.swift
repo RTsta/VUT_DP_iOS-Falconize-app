@@ -8,14 +8,19 @@
 import Foundation
 import AVFoundation
 import UIKit // FIXME: do budoucna to tady nemá co dělat
+import Combine
 
 class CameraService: NSObject {
     
-    @Published public var flashMode: AVCaptureDevice.FlashMode = .off
-    @Published public var willCapturePhoto = false
-    @Published public var isCameraButtonDisabled = true
-    @Published public var isCameraUnavailable = true
+    @Published var isCaptureButtonEnabled = false
+    @Published var isRecordButtonEnabled = false
+    @Published var isCameraUnavailable = true
     @Published var deviceLensDirection: AVCaptureDevice.Position = .unspecified
+    @Published var flashMode: AVCaptureDevice.FlashMode = .off
+    @Published var slowMode : Bool = false
+    @Published var isHistoryCaptureReady = false
+    
+    @Published var videoQuality: VideoSettings = .init(type: .v1080p30fps, codec: .hevc, fileType: .mov)
     
     private var isConfigured = false
     private var isSessionRunning = false
@@ -25,27 +30,39 @@ class CameraService: NSObject {
     private var inProgressPhotoCaptureDelegates = [Int64: PhotoCaptureProcessor]()
     let sessionQueue = DispatchQueue(label: "CameraQueue", qos: .userInteractive)
     var session = AVCaptureSession()
+    private var subscriptions = Set<AnyCancellable>()
     
     // delegate for PosePredictor
     var outputDelegates: [AVCaptureVideoDataOutputSampleBufferDelegate] = .init()
+    @Published var videoInputDevice: AVCaptureDeviceInput?
     
-    private var deviceInput: AVCaptureDeviceInput?
-    @Published var photoOutput = AVCapturePhotoOutput()
+    private var photoOutput = AVCapturePhotoOutput()
+    private var videoOutput = AVCaptureMovieFileOutput()
     
-    @Published var videoOutput = AVCaptureMovieFileOutput()
+    lazy var defaultBackVideoDevice: AVCaptureDevice? = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera, .builtInWideAngleCamera, .builtInUltraWideCamera,.builtInTelephotoCamera], mediaType: .video, position: .back).devices.first
+    private lazy var defaultFrontVideoDevice: AVCaptureDevice? = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera], mediaType: .video, position: .front).devices.first
+    
+    // those variables are related with zoom functionality in slowmotion mode, because for high frame rate, you have to treat lenses separately
+    private lazy var backVideoDevicesForSlowMo : [AVCaptureDevice] = defaultBackVideoDevice?.constituentDevices ?? [AVCaptureDevice.default(for: .video)!]
+    @Published var defaultBackDeviceZoomFactors : [NSNumber] = []
+    
     private var videoProcessor = VideoCaptureProcessor()
+    private lazy var captureHistory: CaptureHistoryProcessor = CaptureHistoryProcessor(videoSettings: self.videoQuality)
     public var isVideoRecording = false
-    /// Video will be recorded to this folder
-    public var outputFolder: String = NSTemporaryDirectory()
     
-    private var captureHistory: CaptureHistoryProcessor = CaptureHistoryProcessor(videoSettings: .init(width: 1920, height: 1080, codec: .hevc, fileType: .mov, frameRate: 30))
-    
+    override init() {
+        super.init()
+        defaultBackDeviceZoomFactors = defaultBackVideoDevice?.virtualDeviceSwitchOverVideoZoomFactors ?? []
+        captureHistory.$isReady.sink{[weak self] isReady in
+            self?.isHistoryCaptureReady = isReady
+        }.store(in: &self.subscriptions)
+    }
     
     public func checkForPermissions() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
+            case .authorized:
                 self.cameraSetupResult = .success
-        case .notDetermined:
+            case .notDetermined:
                 sessionQueue.suspend()
                 AVCaptureDevice.requestAccess(for: .video, completionHandler: { granted in
                     if !granted {
@@ -54,10 +71,11 @@ class CameraService: NSObject {
                     self.sessionQueue.resume()
                 })
                 
-        default:
+            default:
                 self.cameraSetupResult = .notAuthorized
                 self.isCameraUnavailable = true
-                self.isCameraButtonDisabled = true
+                self.isCaptureButtonEnabled = false
+                self.isRecordButtonEnabled = false
         }
     }
     
@@ -67,48 +85,63 @@ class CameraService: NSObject {
         }
         
         session.beginConfiguration()
+        session.sessionPreset = videoQuality.value.preset()
         setupVideoInput()
-        // session.sessionPreset = .photo
-        setupPhotoOutput()
-        setupVideoOutput()
-        addHistoryBufferTest()
         
+        // setupPhotoOutput()
+        // setupVideoOutput()
+        addOutputDelegate(delegate: self.captureHistory)
         session.commitConfiguration()
+        
         self.isConfigured = true
         self.start()
     }
     
+    /// setupVideoInput()
     private func setupVideoInput() {
-        var defaultVideoDevice: AVCaptureDevice? = AVCaptureDevice.default(for: .video)
-        guard let videoDevice = defaultVideoDevice else {
-            debugPrint("Default video device is unavailable.")
+        var videoDevice: AVCaptureDevice?
+        if let defaultBackVideoDevice = defaultBackVideoDevice {
+            videoDevice = defaultBackVideoDevice
+        } else {
+            if let defaultFrontVideoDevice = defaultFrontVideoDevice {
+                videoDevice = defaultFrontVideoDevice
+            } else {
+                videoDevice = AVCaptureDevice.default(for: .video)
+            }
+        }
+        guard let videoDevice = videoDevice else {
+            myErrorPrint("\(String(describing: self )).\(#function) - Default video device is unavailable.")
             return
         }
         do {
             let videoInput = try AVCaptureDeviceInput(device: videoDevice)
             if session.canAddInput(videoInput) {
                 session.addInput(videoInput)
-                self.deviceInput = videoInput
+                videoInput.videoMinFrameDurationOverride = CMTimeMake(value: 1, timescale: 120)
+                self.videoInputDevice = videoInput
                 self.deviceLensDirection = videoInput.device.position
                 
             }
         } catch {
-            print("CameraService - configureSession")
-            print(error.localizedDescription)
+            myErrorPrint("\(String(describing: self )).\(#function) - \(error.localizedDescription)")
             cameraSetupResult = .configurationFailed
+            self.isConfigured = true
             session.commitConfiguration()
             return
         }
     }
     
+    /// setupPhotoOutput()
     private func setupPhotoOutput() {
-        if session.canAddOutput(photoOutput) {
-            session.addOutput(photoOutput)
+        let output = AVCapturePhotoOutput()
+        if session.canAddOutput(output) {
+            session.addOutput(output)
             // photoOutput.maxPhotoDimensions =
             // photoOutput.maxPhotoQualityPrioritization = .quality
         }
     }
     
+    /// setupVideoOutput()
     private func setupVideoOutput() {
         if self.session.canAddOutput(videoOutput) {
             self.session.addOutput(videoOutput)
@@ -120,23 +153,7 @@ class CameraService: NSObject {
         }
     }
     
-    // FIXME: kdyžtak refactorovat a přemazat
-    func addHistoryBufferTest() {
-        sessionQueue.async {
-            self.session.beginConfiguration()
-            let dataOutput = AVCaptureVideoDataOutput()
-            if self.session.canAddOutput(dataOutput) {
-                self.session.addOutput(dataOutput)
-                dataOutput.setSampleBufferDelegate(self.captureHistory, queue: self.sessionQueue)
-                self.outputDelegates.append(self.captureHistory)
-            } else {
-                return
-                
-            }
-            self.session.commitConfiguration()
-        }
-    }
-    
+    /// addOutputDelegate()
     func addOutputDelegate(delegate: AVCaptureVideoDataOutputSampleBufferDelegate) {
         sessionQueue.async {
             self.session.beginConfiguration()
@@ -153,6 +170,18 @@ class CameraService: NSObject {
         }
     }
     
+    /// captureAction
+    public func captureAction() {
+        Task {
+            await captureHistory.testAction()
+        }
+    }
+}
+
+
+// MARK: Camera actions
+extension CameraService {
+    /// start()
     public func start() {
         sessionQueue.async {
             if !self.isSessionRunning && self.isConfigured {
@@ -163,15 +192,17 @@ class CameraService: NSObject {
                         
                         if self.session.isRunning {
                             DispatchQueue.main.async {
-                                self.isCameraButtonDisabled = false
+                                self.isCaptureButtonEnabled = true
+                                self.isRecordButtonEnabled = true
                                 self.isCameraUnavailable = false
                             }
                         }
                         
                     case .configurationFailed, .notAuthorized:
-                        print("Application not authorized to use camera")
+                        myErrorPrint("Application not authorized to use camera")
                         DispatchQueue.main.async {
-                            self.isCameraButtonDisabled = true
+                            self.isCaptureButtonEnabled = false
+                            self.isRecordButtonEnabled = false
                             self.isCameraUnavailable = true
                         }
                 }
@@ -185,10 +216,10 @@ class CameraService: NSObject {
                 if self.cameraSetupResult == .success {
                     self.session.stopRunning()
                     self.isSessionRunning = self.session.isRunning
-                    
                     if !self.session.isRunning {
                         DispatchQueue.main.async {
-                            self.isCameraButtonDisabled = true
+                            self.isCaptureButtonEnabled = false
+                            self.isRecordButtonEnabled = false
                             self.isCameraUnavailable = true
                             completion?()
                         }
@@ -198,97 +229,158 @@ class CameraService: NSObject {
         }
     }
     
-    public func changeCamera() {
-        DispatchQueue.main.async {
-            self.isCameraButtonDisabled = true
-        }
-        
+    public func flipCamera() {
         sessionQueue.async {
-            guard let deviceInput = self.deviceInput else {
+            guard let deviceInput = self.videoInputDevice else {
                 return
             }
             let currentDevice = deviceInput.device
             let currentPosition = currentDevice.position
             var newDevice: AVCaptureDevice?
             
-            let backVideoDeviceDiscoverySession = AVCaptureDevice.default(for: .video)
-            let frontVideoDeviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera], mediaType: .video, position: .front)
-            
             // nastavení nového vstupního zařízení
             switch currentPosition {
                 case .unspecified, .front:
-                    newDevice = backVideoDeviceDiscoverySession
+                    newDevice = self.defaultBackVideoDevice
                 case .back:
-                    newDevice = frontVideoDeviceDiscoverySession.devices.first
+                    newDevice = self.defaultFrontVideoDevice
                 @unknown default:
                     print("Unknown capture position. Defaulting to back, dual-camera.")
-                    newDevice = AVCaptureDevice.default(.builtInDualCamera, for: .video, position: .back)
+                    newDevice = AVCaptureDevice.default(for: .video)
             }
             
             if let newDevice = newDevice {
-                do {
-                    let input = try AVCaptureDeviceInput(device: newDevice )
-                    self.session.beginConfiguration()
-                    if let currentDeviceInput = self.deviceInput {
-                        self.session.removeInput(currentDeviceInput)
-                    }
-                    
-                    if self.session.canAddInput(input) {
-                        self.session.addInput(input)
-                        self.deviceInput = input
-                        DispatchQueue.main.async {
-                            self.outputDelegates.forEach {
-                                if let posePredictor = $0 as? PosePredictor {
-                                    posePredictor.cameraPosition = input.device.position
-                                }
-                            }
-                        }
-                        
-                    } else {
-                        if let currentDeviceInput = self.deviceInput {
-                            self.session.addInput(currentDeviceInput)
-                        }
-                    }
-                    
-                    if let connection = self.photoOutput.connection(with: .video) {
-                        if connection.isVideoStabilizationSupported {
-                            connection.preferredVideoStabilizationMode = .auto
-                        }
-                    }
-                    
-                    self.session.commitConfiguration()
-                } catch {
-                    print("CameraService - changecamera() - \(error.localizedDescription)")
-                }
+                self.changeDevice(for: newDevice)
+            }
+        }
+    }
+    
+    public func changeDevice(for newDevice: AVCaptureDevice, withFPS fps: Double? = nil) {
+        DispatchQueue.main.async {
+            self.isCaptureButtonEnabled = false
+            self.isRecordButtonEnabled = false
+        }
+        
+        sessionQueue.async {
+            guard let currentDeviceInput = self.videoInputDevice else {
+                return
             }
             
-            DispatchQueue.main.async {
-                self.isCameraButtonDisabled = false
+            do {
+                if let fps = fps {
+                    newDevice.changeFrameRate(toFPS: fps)
+                }
+                let input = try AVCaptureDeviceInput(device: newDevice)
+                
+                self.session.beginConfiguration()
+                self.session.removeInput(currentDeviceInput)
+                
+                if self.session.canAddInput(input) {
+                    self.session.addInput(input)
+                    self.videoInputDevice = input
+                    DispatchQueue.main.async {
+                        self.outputDelegates.forEach {
+                            if let posePredictor = $0 as? PosePredictor {
+                                posePredictor.cameraPosition = input.device.position
+                            }
+                        }
+                    }
+                } else {
+                    self.session.addInput(currentDeviceInput)
+                }
+                
+                if let connection = self.photoOutput.connection(with: .video) {
+                    if connection.isVideoStabilizationSupported {
+                        connection.preferredVideoStabilizationMode = .auto
+                    }
+                }
+                
+                self.session.commitConfiguration()
+            } catch {
+                print("CameraService - changeDevice() - \(error.localizedDescription)")
             }
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.isCaptureButtonEnabled = true
+            self?.isRecordButtonEnabled = true
         }
     }
     
     public func set(zoom: CGFloat) {
         let factor = zoom < 1 ? 1 : zoom
-        guard let device = deviceInput?.device else {
+        guard let device = videoInputDevice?.device else {
             return
         }
         
+        if !device.isVirtualDevice {
+            self.changeLensesIfNeeded(zoom: zoom)
+        }
+
+        self.zoom(zoomVirtualDevice: zoom)
+    }
+    
+    private func zoom(zoomVirtualDevice zoom: CGFloat){
+        guard let device = videoInputDevice?.device else {
+            return
+        }
         do {
             try device.lockForConfiguration()
-            device.videoZoomFactor = factor
+            device.videoZoomFactor = zoom
             device.unlockForConfiguration()
         } catch {
             print(error.localizedDescription)
         }
     }
     
+    private func changeLensesIfNeeded(zoom: CGFloat){
+        guard let device = videoInputDevice?.device else {
+            return
+        }
+        
+        let allAvaibileZoom = [1] + (defaultBackDeviceZoomFactors as? [CGFloat] ?? [])
+        let bestCameraIndex = allAvaibileZoom.lastIndex { deviceFactor in
+            deviceFactor <= zoom
+        }
+        
+        guard let bestCameraIndex = bestCameraIndex else { return }
+        let deviceForTheJob = backVideoDevicesForSlowMo[bestCameraIndex]
+        
+        if (device.deviceType != deviceForTheJob.deviceType) {
+            changeDevice(for: deviceForTheJob, withFPS: videoQuality.value.fps())
+        }
+    }
+    
+    // TODO: - dodělat
+    public func focus(at focusPoint: CGPoint){
+        //let focusPoint = self.videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
+        
+        guard let device = self.videoInputDevice?.device else { return }
+        do {
+            try device.lockForConfiguration()
+            if device.isFocusPointOfInterestSupported {
+                device.focusPointOfInterest = focusPoint
+                device.focusMode = .continuousAutoFocus
+                device.exposurePointOfInterest = focusPoint
+                device.exposureMode = .continuousAutoExposure
+                device.unlockForConfiguration()
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+}
+
+// MARK: - Photo Capture
+extension CameraService {
     // podle https://betterprogramming.pub/effortless-swiftui-camera-d7a74abde37e
     func capturePhoto() {
         guard self.cameraSetupResult != .configurationFailed else {
             return
         }
-        self.isCameraButtonDisabled = true
+        self.isCaptureButtonEnabled = false
+        self.isRecordButtonEnabled = false
         sessionQueue.async {
             if let photoOutputConnection = self.photoOutput.connection(with: .video) {
                 photoOutputConnection.videoOrientation = .portrait
@@ -301,11 +393,10 @@ class CameraService: NSObject {
             }
             
             // Sets the flash option for this capture.
-            if let dev = self.deviceInput,
+            if let dev = self.videoInputDevice,
                dev.device.isFlashAvailable {
                 photoSettings.flashMode = self.flashMode
             }
-            
             
             // Sets the preview thumbnail pixel format
             if !photoSettings.__availablePreviewPhotoPixelFormatTypes.isEmpty {
@@ -317,13 +408,12 @@ class CameraService: NSObject {
                 // When the capture is complete, remove a reference to the photo capture delegate so it can be deallocated.
                 if let data = photoCaptureProcessor.photoData {
                     // self.photo = Photo(originalData: data)
-                    debugPrint(data.debugDescription)
-                    myDebugPrint("passing photo")
                 } else {
                     myDebugPrint("No photo data")
                 }
                 
-                self.isCameraButtonDisabled = false
+                self.isCaptureButtonEnabled = true
+                self.isRecordButtonEnabled = true
                 
                 self.sessionQueue.async {
                     self.inProgressPhotoCaptureDelegates[photoCaptureProcessor.requestedPhotoSettings.uniqueID] = nil
@@ -342,17 +432,17 @@ class CameraService: NSObject {
             self.photoOutput.capturePhoto(with: photoSettings, delegate: photoCaptureProcessor)
         }
     }
-    
+}
+
+// MARK: - Video Recording
+extension CameraService {
     public func startVideoRecording() {
-        
-        //        guard sessionRunning == true else {
-        //            print("[SwiftyCam]: Cannot start video recoding. Capture session is not running")
-        //            return
-        //        }
-        
-        
+        guard isSessionRunning == true else {
+            myErrorPrint("Cannot start video recoding. Capture session is not running")
+            return
+        }
         // Must be fetched before on main thread
-        // let previewOrientation = previewLayer.videoPreviewLayer.connection!.videoOrientation
+        let previewOrientation = UIDevice.current.orientation
         
         sessionQueue.async { [unowned self] in
             if !videoOutput.isRecording {
@@ -362,19 +452,21 @@ class CameraService: NSObject {
                 
                 // Update the orientation on the movie file output video connection before starting recording.
                 let movieFileOutputConnection = self.videoOutput.connection(with: AVMediaType.video)
-                
-                
-                // flip video output if front facing camera is selected
-                //                if self.currentCamera == .front {
-                //                    movieFileOutputConnection?.isVideoMirrored = true
-                //                }
-                
-                // videoOutput?.videoOrientation = self.orientation.getVideoOrientation() ?? previewOrientation
+                switch previewOrientation {
+                    case .portrait:
+                        movieFileOutputConnection?.videoOrientation = .portrait
+                    case .landscapeLeft:
+                        movieFileOutputConnection?.videoOrientation = .landscapeLeft
+                    case .landscapeRight:
+                        movieFileOutputConnection?.videoOrientation = .landscapeRight
+                    default:
+                        break
+                }
                 
                 // Start recording to a temporary file.
                 let outputFileName = UUID().uuidString
-                let outputFilePath = (self.outputFolder as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
-                videoOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: videoProcessor)
+                let outputFilePath = URL.temporaryDirectory.appendingPathComponent(outputFileName).appendingPathExtension("mov")
+                videoOutput.startRecording(to: outputFilePath, recordingDelegate: videoProcessor)
                 self.isVideoRecording = true
             } else {
                 videoOutput.stopRecording()
@@ -386,31 +478,149 @@ class CameraService: NSObject {
         if self.isVideoRecording == true {
             self.isVideoRecording = false
             videoOutput.stopRecording()
-            // disableFlash()
-            
-            //            if currentCamera == .front && flashMode == .on && flashView != nil {
-            //                UIView.animate(withDuration: 0.1, delay: 0.0, options: .curveEaseInOut, animations: {
-            //                    self.flashView?.alpha = 0.0
-            //                }, completion: { (_) in
-            //                    self.flashView?.removeFromSuperview()
-            //                })
-            //            }
-            //            DispatchQueue.main.async {
-            //                self.cameraDelegate?.swiftyCam(self, didFinishRecordingVideo: self.currentCamera)
-            //            }
         }
     }
     
-    public func captureAction() {
-        Task {
-            await captureHistory.testAction()
+    func switchSlowMode(){
+        if slowMode {
+            guard let device = defaultBackVideoDevice else { return }
+            device.changeFrameRate(toFPS: 30)
+            changeDevice(for: device)
+            slowMode.toggle()
+        } else {
+            guard let device = backVideoDevicesForSlowMo.first else { return }
+            videoQuality = .init(type: .v1080p120fps, codec: videoQuality.codec, fileType: videoQuality.fileType)
+            captureHistory.changeSettings(newSettings: videoQuality)
+            changeDevice(for: device)
+            device.changeFrameRate(toFPS: videoQuality.value.fps())
+            slowMode.toggle()
         }
     }
 }
+
 extension CameraService {
     enum SessionSetupResult {
         case success
         case notAuthorized
         case configurationFailed
+    }
+}
+
+private extension CameraService {
+    func allBackDeviceTypes() -> [AVCaptureDevice.DeviceType] {
+        [.builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera, .builtInWideAngleCamera,.builtInUltraWideCamera,.builtInTelephotoCamera]
+    }
+    
+    //    func loadAvaibileDevices(forSettings: VideoSettings) -> [AVCaptureDevice] {
+    //            return AVCaptureDevice.DiscoverySession(deviceTypes: allBackDeviceTypes(), mediaType: .video, position: .back)
+    //                .devices
+    //                .filter({
+    //                    $0.formats.contains(where: {
+    //                        $0.videoSupportedFrameRateRanges.contains(where: {
+    //                            $0.maxFrameRate == forSettings.value.fps()
+    //                        })
+    //                    })
+    //                })
+    //        }
+    
+}
+
+struct VideoSettings {
+    let value : CaptureQualityPreset
+    
+    enum CaptureQualityPreset: Equatable {
+        case v720p30fps
+        case v1080p30fps
+        case v1080p60fps
+        case v4k30fps
+        case v1080p120fps
+        case v1080p240fps
+        
+        func fps() -> Double {
+            switch self {
+                case .v720p30fps, .v1080p30fps, .v4k30fps:
+                    return 30
+                case .v1080p60fps:
+                    return 60
+                case .v1080p120fps:
+                    return 120
+                case .v1080p240fps:
+                    return 240
+            }
+        }
+        
+        func preset() -> AVCaptureSession.Preset {
+            switch self {
+                case .v720p30fps:
+                    return .hd1280x720
+                case .v1080p30fps, .v1080p60fps, .v1080p120fps, .v1080p240fps:
+                    return .hd1920x1080
+                case .v4k30fps:
+                    return .hd4K3840x2160
+            }
+        }
+        
+        func dimensions() -> CMVideoDimensions {
+            switch self {
+                case .v720p30fps:
+                    return CMVideoDimensions(width: 1280, height: 720)
+                case .v1080p30fps, .v1080p60fps, .v1080p120fps, .v1080p240fps:
+                    return CMVideoDimensions(width: 1920, height: 1080)
+                case .v4k30fps:
+                    return CMVideoDimensions(width: 3840, height: 2160)
+            }
+        }
+    }
+    let codec: AVVideoCodecType
+    let fileType: AVFileType
+    let frameRate: CMTimeScale
+    let width: Int32
+    let height: Int32
+    init(type:CaptureQualityPreset, codec: AVVideoCodecType, fileType: AVFileType) {
+        self.value = type
+        self.codec = codec
+        self.fileType = fileType
+        self.frameRate = CMTimeScale(type.fps())
+        self.width = type.dimensions().width
+        self.height = type.dimensions().height
+    }
+    
+    func fileTypeExtension() -> String {
+        switch self.fileType {
+            case .mov:
+                return "mov"
+            default:
+                return ""
+        }
+    }
+}
+
+private extension AVCaptureDevice {
+    func findFormat(fps: Double, width: Int32, height: Int32) -> Format? {
+        
+        self.formats.first{ format in
+            format.videoSupportedFrameRateRanges.contains{ range in
+                range.minFrameRate <= fps && fps <= range.maxFrameRate
+            }
+            && format.formatDescription.dimensions.width == width
+            && format.formatDescription.dimensions.height == height
+        }
+    }
+    
+    func changeFrameRate(toFPS fps: Double) {
+        let newFormat = self.findFormat(fps: fps,
+                                        width: self.activeFormat.formatDescription.dimensions.width,
+                                        height: self.activeFormat.formatDescription.dimensions.height)
+        if let newFormat = newFormat {
+            do {
+                try self.lockForConfiguration()
+                self.activeFormat = newFormat
+                self.activeVideoMinFrameDuration = CMTimeMake(value: 1, timescale: Int32(fps))
+                self.activeVideoMaxFrameDuration = CMTimeMake(value: 1, timescale: Int32(fps))
+                self.unlockForConfiguration()
+            } catch {
+                // Handle error.
+            }
+        }
     }
 }
