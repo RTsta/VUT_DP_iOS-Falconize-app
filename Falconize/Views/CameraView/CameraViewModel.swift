@@ -25,10 +25,13 @@ final class CameraViewModel: ObservableObject {
     @Published var zoomPresetsSlowMo: [CGFloat] = []
     
     var session: AVCaptureSession
-    private var subscriptions = Set<AnyCancellable>()
+    var previewView: VideoPreviewView
     
+    private var subscriptions = Set<AnyCancellable>()
+        
     init() {
         self.session = service.session
+        self.previewView = VideoPreviewView()
         initSubscribers()
     }
     
@@ -43,7 +46,9 @@ final class CameraViewModel: ObservableObject {
         
         service.$videoInputDevice.sink { [weak self] (device) in
             DispatchQueue.main.async {
-                guard let device = device?.device else { return }
+                guard let device = device?.device else {
+                    return
+                }
                 self?.inputDevice = device
                 if device.isVirtualDevice {
                     self?.minZoomFactor = self?.inputDevice?.minAvailableVideoZoomFactor ?? 1.0
@@ -53,13 +58,13 @@ final class CameraViewModel: ObservableObject {
                     self?.zoomPresets = presets
                 } else {
                     var presets: [CGFloat] = [device.minAvailableVideoZoomFactor]
-                    presets.append(contentsOf: self?.service.defaultBackDeviceZoomFactors.map( {CGFloat(truncating: $0)} ) ?? [] )
+                    presets.append(contentsOf: self?.service.defaultBackDeviceZoomFactors.map({ CGFloat(truncating: $0) }) ?? [] )
                     self?.zoomPresetsSlowMo = presets
                 }
             }
         }.store(in: &self.subscriptions)
         
-        service.$isHistoryCaptureReady.sink{isReady in
+        service.$isHistoryCaptureReady.sink { isReady in
             DispatchQueue.main.async {[weak self]  in
                 self?.isHistoryCaptureReady = isReady
             }
@@ -112,7 +117,7 @@ final class CameraViewModel: ObservableObject {
 
     }
     
-    func focus(at focusPoint: CGPoint){
+    func focus(at focusPoint: CGPoint) {
         service.focus(at: focusPoint)
     }
     

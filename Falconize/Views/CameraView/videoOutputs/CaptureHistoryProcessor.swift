@@ -42,7 +42,7 @@ class CaptureHistoryProcessor: NSObject {
         super.init()
     }
     
-    func changeSettings(newSettings: VideoSettings){
+    func changeSettings(newSettings: VideoSettings) {
         self.videoSettings = newSettings
     }
 }
@@ -93,30 +93,30 @@ extension CaptureHistoryProcessor {
         assetWriter = try? AVAssetWriter(outputURL: chunkOutputURL, fileType: .mov)
         guard let assetWriter = assetWriter else {
             myErrorPrint("\(String(describing: self )).\(#function) - not initialized AVAssetWriter")
-            fatalError()
+            fatalError("not initialized AVAssetWriter")
         }
             
         assetWriter.shouldOptimizeForNetworkUse = true
         
-        var bitsPerPixel : CGFloat = 10.1 // This bitrate approximately matches the quality produced by AVCaptureSessionPresetHigh.
+        var bitsPerPixel: CGFloat = 10.1 // This bitrate approximately matches the quality produced by AVCaptureSessionPresetHigh.
         if self.videoSettings.value.dimensions().width * self.videoSettings.value.dimensions().height < 640 * 480 {
-            bitsPerPixel = 4.05; // This bitrate approximately matches the quality produced by AVCaptureSessionPresetMedium or Low.
+            bitsPerPixel = 4.05 // This bitrate approximately matches the quality produced by AVCaptureSessionPresetMedium or Low.
         }
         
         
         let outputSettings: [String: Any] = [ AVVideoCodecKey: videoSettings.codec,
                                               AVVideoWidthKey: videoSettings.value.dimensions().width,
                                               AVVideoHeightKey: videoSettings.value.dimensions().height,
-                              AVVideoCompressionPropertiesKey: [ AVVideoAverageBitRateKey : CGFloat(self.videoSettings.value.dimensions().width) * CGFloat(self.videoSettings.value.dimensions().height) * bitsPerPixel,
-                                                                              AVVideoExpectedSourceFrameRateKey : self.videoSettings.value.fps(),
-                                                                                  AVVideoMaxKeyFrameIntervalKey : self.videoSettings.value.fps()
+                              AVVideoCompressionPropertiesKey: [ AVVideoAverageBitRateKey: CGFloat(self.videoSettings.value.dimensions().width) * CGFloat(self.videoSettings.value.dimensions().height) * bitsPerPixel,
+                                                                              AVVideoExpectedSourceFrameRateKey: self.videoSettings.value.fps(),
+                                                                                  AVVideoMaxKeyFrameIntervalKey: self.videoSettings.value.fps()
                                                                ]
                                               ]
         
         assetWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: outputSettings)
         guard let assetWriterInput = assetWriterInput else {
             myErrorPrint("\(String(describing: self )).\(#function) - not initialized AssetWriterInput")
-            fatalError()
+            fatalError("not initialized AssetWriterInput")
         }
         assetWriterInput.expectsMediaDataInRealTime = true
         assetWriter.add(assetWriterInput)
@@ -136,10 +136,12 @@ extension CaptureHistoryProcessor {
 // MARK: - AVMutableComposition
 extension CaptureHistoryProcessor {
     private func mergeVideos(videoURLs: [URL]) async throws {
-        if (videoURLs.isEmpty) { return }
+        if videoURLs.isEmpty {
+            return
+        }
         
         let composition = AVMutableComposition()
-        guard let compositionTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) //vytvoří novou stopu v kompozici (composition)
+        guard let compositionTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) // vytvoří novou stopu v kompozici (composition)
         else {
             throw CaptureHistoryError.runtimeError("\(String(describing: self )).\(#function) - Unable to create compositionTrack")
         }
@@ -180,10 +182,10 @@ extension CaptureHistoryProcessor {
         
         let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionTrack)
         do {
-            let x = outputFinalSizeAndRotation(size: try await assetTrack.load(.naturalSize),
+            let sizeAndRotation = outputFinalSizeAndRotation(size: try await assetTrack.load(.naturalSize),
                                   transform: try await assetTrack.load(.preferredTransform))
-            videoComposition.renderSize = x.size
-            layerInstruction.setTransform(x.transform, at: .zero)
+            videoComposition.renderSize = sizeAndRotation.size
+            layerInstruction.setTransform(sizeAndRotation.transform, at: .zero)
             instruction.layerInstructions = [layerInstruction]
         } catch {
             throw error
@@ -201,10 +203,10 @@ extension CaptureHistoryProcessor {
         if deviceOrientation == .portrait && size.width > size.height {
             return (CGSize(width: size.height, height: size.width),
                     transform.translatedBy(x: size.height, y: 0).rotated(by: .pi/2))
-        }else if deviceOrientation == .portraitUpsideDown && size.width > size.height {
-            return  (CGSize(width: size.height, height: size.width),
+        } else if deviceOrientation == .portraitUpsideDown && size.width > size.height {
+            return (CGSize(width: size.height, height: size.width),
                      transform.translatedBy(x: 0, y: size.width).rotated(by: .pi * 1.5))
-        }else if deviceOrientation == .landscapeRight{
+        } else if deviceOrientation == .landscapeRight {
             return (size, transform.translatedBy(x: size.width, y: size.height).rotated(by: .pi))
         } else {
             return (size, transform)
@@ -240,11 +242,11 @@ extension CaptureHistoryProcessor {
         PHPhotoLibrary.requestAuthorization { [weak self] status in
             switch status {
                 case .authorized:
-                    PHPhotoLibrary.shared().performChanges( {
+                    PHPhotoLibrary.shared().performChanges({
                         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
                     }) { [weak self] (isSaved, error) in
                         if isSaved {
-                            myDebugPrint("video saved",onScreen: true)
+                            myDebugPrint("video saved", onScreen: true)
                         } else {
                             myErrorPrint("\(String(describing: self )).\(#function) - Cannot save video. - \(error?.localizedDescription ?? "unknown error")")
                         }
@@ -255,8 +257,7 @@ extension CaptureHistoryProcessor {
         }
     }
     
-    //TODO: rename
-    func testAction() async {
+    func movementActionTrigged() async {
         Task {
             print("AKCE v framu \(chunkNumber)")
             let currentChunkNumber = chunkNumber

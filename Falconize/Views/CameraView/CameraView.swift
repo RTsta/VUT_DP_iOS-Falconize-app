@@ -23,7 +23,10 @@ struct CameraView: View {
     
     var body: some View {
         ZStack {
-            cameraPreview
+            ZStack {
+                cameraPreview
+                gridView
+            }
             if showFocusPoint {
                 FocusPointView()
                     .frame(width: 100, height: 100)
@@ -40,6 +43,11 @@ struct CameraView: View {
                         resetButton
                         flashButton
                         Spacer()
+                        Toggle(isOn: $debugMode) {
+                            
+                        }.onChange(of: debugMode) { _ in
+                            myDebugPrint(debugMode)
+                        }
                         frameRateButton
                         switchButton
                     }.padding(3)
@@ -51,12 +59,13 @@ struct CameraView: View {
                 Spacer().layoutPriority(2)
                 switchLensButtons
                 ZStack {
-                        recordButton
-                    HStack {
-                        testCaptureButton
-                        Spacer()
-                        captureButton
-                    }.padding()
+                    testCaptureButton
+                        
+//                    HStack {
+//                        recordButton
+//                        Spacer()
+//                        captureButton
+//                    }.padding()
                 }
             }
         }
@@ -85,6 +94,7 @@ struct CameraView: View {
     }
     
     @ViewBuilder var debuggingUI: some View {
+        if debugMode {
         ZStack {
             RoundedRectangle(cornerRadius: 44)
                 .foregroundColor(.white)
@@ -94,32 +104,22 @@ struct CameraView: View {
                     testOpacity = (testOpacity > 0.5 ? 0.5 : 1.0)
                 }
             VStack {
-                if debugMode {
-                    PoseTextView(posePredictor: posePredictor)
-                    ConsoleLogText()
-                }
-                Spacer()
-                HStack {
-                    testButton()
-                    Spacer()
-                    Toggle(isOn: $debugMode) {
-                        
-                    }.onChange(of: debugMode) { _ in
-                        myDebugPrint(debugMode)
-                    }.padding([.bottom])
-                }.padding([.leading, .trailing])}
+                PoseTextView(posePredictor: posePredictor)
+                ConsoleLogText()
+            }
         }.frame(maxHeight: 150)
+    }
     }
     
     @ViewBuilder var cameraPreview: some View {
         GeometryReader { geometry in
-            CameraPreview(session: cameraViewModel.session)
+            CameraPreview(session: cameraViewModel.session, view: cameraViewModel.previewView)
                 .onAppear {
                     cameraViewModel.configure()
                     cameraViewModel.addPoseDelegate(delegate: posePredictor)
                 }
                 .gesture(
-                    MagnificationGesture().onChanged{ value in
+                    MagnificationGesture().onChanged { value in
                         if value > 1.0 {
                             displayZoom = currentZoom + value
                             cameraViewModel.zoom(with: displayZoom)
@@ -128,7 +128,7 @@ struct CameraView: View {
                             displayZoom = displayZoom < 1.0 ? 1.0 : displayZoom
                             cameraViewModel.zoom(with: currentZoom * value)
                         }
-                    }.onEnded{ value in
+                    }.onEnded { value in
                         if value > 1.0 {
                             currentZoom += value
                         } else {
@@ -137,18 +137,24 @@ struct CameraView: View {
                         displayZoom = currentZoom
                     }
                 )
-                .onTapGesture(count: 1,coordinateSpace: .local){ point in
+                .onTapGesture(count: 1, coordinateSpace: .local) { point in
                     tapFocusPoint = point
-                    cameraViewModel.focus(at: point)
+                    let convertedPoint = cameraViewModel.previewView.videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
+                    cameraViewModel.focus(at: convertedPoint)
+                    
                         self.showFocusPoint.toggle()
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        withAnimation(.linear(duration: 1)){
+                        withAnimation(.linear(duration: 1)) {
                             self.showFocusPoint.toggle()
                         }
                     }
                 }
             StickFigureView(posePredictor: posePredictor, size: geometry.size)
         }
+    }
+    
+    @ViewBuilder var gridView: some View {
+        EmptyView()
     }
     
     // MARK: - Buttons
@@ -277,7 +283,7 @@ struct CameraView: View {
                     .opacity(0.3)
                     .foregroundColor(.black)
                 HStack {
-                    ForEach(presets.indices, id: \.self){ index in
+                    ForEach(presets.indices, id: \.self) { index in
                         let preset = presets[index]
                         let nextPreset: CGFloat = index+1 < presets.count ? presets[index + 1] : .infinity
                         Button(action: {

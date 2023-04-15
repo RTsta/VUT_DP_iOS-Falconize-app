@@ -17,7 +17,7 @@ class CameraService: NSObject {
     @Published var isCameraUnavailable = true
     @Published var deviceLensDirection: AVCaptureDevice.Position = .unspecified
     @Published var flashMode: AVCaptureDevice.FlashMode = .off
-    @Published var slowMode : Bool = false
+    @Published var slowMode: Bool = false
     @Published var isHistoryCaptureReady = false
     
     @Published var videoQuality: VideoSettings = .init(type: .v1080p30fps, codec: .hevc, fileType: .mov)
@@ -39,12 +39,12 @@ class CameraService: NSObject {
     private var photoOutput = AVCapturePhotoOutput()
     private var videoOutput = AVCaptureMovieFileOutput()
     
-    lazy var defaultBackVideoDevice: AVCaptureDevice? = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera, .builtInWideAngleCamera, .builtInUltraWideCamera,.builtInTelephotoCamera], mediaType: .video, position: .back).devices.first
-    private lazy var defaultFrontVideoDevice: AVCaptureDevice? = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera], mediaType: .video, position: .front).devices.first
+    lazy var defaultBackVideoDevice: AVCaptureDevice? = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera, .builtInWideAngleCamera, .builtInUltraWideCamera, .builtInTelephotoCamera], mediaType: .video, position: .back).devices.first // swiftlint:disable:this line_length
+    private lazy var defaultFrontVideoDevice: AVCaptureDevice? = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera], mediaType: .video, position: .front).devices.first // swiftlint:disable:this line_length
     
     // those variables are related with zoom functionality in slowmotion mode, because for high frame rate, you have to treat lenses separately
-    private lazy var backVideoDevicesForSlowMo : [AVCaptureDevice] = defaultBackVideoDevice?.constituentDevices ?? [AVCaptureDevice.default(for: .video)!]
-    @Published var defaultBackDeviceZoomFactors : [NSNumber] = []
+    private lazy var backVideoDevicesForSlowMo: [AVCaptureDevice] = defaultBackVideoDevice?.constituentDevices ?? [AVCaptureDevice.default(for: .video)!]
+    @Published var defaultBackDeviceZoomFactors: [NSNumber] = []
     
     private var videoProcessor = VideoCaptureProcessor()
     private lazy var captureHistory: CaptureHistoryProcessor = CaptureHistoryProcessor(videoSettings: self.videoQuality)
@@ -53,9 +53,10 @@ class CameraService: NSObject {
     override init() {
         super.init()
         defaultBackDeviceZoomFactors = defaultBackVideoDevice?.virtualDeviceSwitchOverVideoZoomFactors ?? []
-        captureHistory.$isReady.sink{[weak self] isReady in
+        captureHistory.$isReady.sink { [weak self] isReady in
             self?.isHistoryCaptureReady = isReady
         }.store(in: &self.subscriptions)
+        
     }
     
     public func checkForPermissions() {
@@ -173,7 +174,7 @@ class CameraService: NSObject {
     /// captureAction
     public func captureAction() {
         Task {
-            await captureHistory.testAction()
+            await captureHistory.movementActionTrigged()
         }
     }
 }
@@ -308,7 +309,7 @@ extension CameraService {
     }
     
     public func set(zoom: CGFloat) {
-        let factor = zoom < 1 ? 1 : zoom
+        // let factor = zoom < 1 ? 1 : zoom
         guard let device = videoInputDevice?.device else {
             return
         }
@@ -320,7 +321,7 @@ extension CameraService {
         self.zoom(zoomVirtualDevice: zoom)
     }
     
-    private func zoom(zoomVirtualDevice zoom: CGFloat){
+    private func zoom(zoomVirtualDevice zoom: CGFloat) {
         guard let device = videoInputDevice?.device else {
             return
         }
@@ -333,7 +334,7 @@ extension CameraService {
         }
     }
     
-    private func changeLensesIfNeeded(zoom: CGFloat){
+    private func changeLensesIfNeeded(zoom: CGFloat) {
         guard let device = videoInputDevice?.device else {
             return
         }
@@ -343,19 +344,24 @@ extension CameraService {
             deviceFactor <= zoom
         }
         
-        guard let bestCameraIndex = bestCameraIndex else { return }
+        guard let bestCameraIndex = bestCameraIndex else {
+            return
+        }
         let deviceForTheJob = backVideoDevicesForSlowMo[bestCameraIndex]
         
-        if (device.deviceType != deviceForTheJob.deviceType) {
+        if device.deviceType != deviceForTheJob.deviceType {
             changeDevice(for: deviceForTheJob, withFPS: videoQuality.value.fps())
         }
     }
     
     // TODO: - dodělat
-    public func focus(at focusPoint: CGPoint){
-        //let focusPoint = self.videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
+    public func focus(at focusPoint: CGPoint) {
+        // let focusPoint = self.videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
         
-        guard let device = self.videoInputDevice?.device else { return }
+        guard let device = self.videoInputDevice?.device else {
+            return
+        }
+        
         do {
             try device.lockForConfiguration()
             if device.isFocusPointOfInterestSupported {
@@ -481,14 +487,18 @@ extension CameraService {
         }
     }
     
-    func switchSlowMode(){
+    func switchSlowMode() {
         if slowMode {
-            guard let device = defaultBackVideoDevice else { return }
+            guard let device = defaultBackVideoDevice else {
+                return
+            }
             device.changeFrameRate(toFPS: 30)
             changeDevice(for: device)
             slowMode.toggle()
         } else {
-            guard let device = backVideoDevicesForSlowMo.first else { return }
+            guard let device = backVideoDevicesForSlowMo.first else {
+                return
+            }
             videoQuality = .init(type: .v1080p120fps, codec: videoQuality.codec, fileType: videoQuality.fileType)
             captureHistory.changeSettings(newSettings: videoQuality)
             changeDevice(for: device)
@@ -508,7 +518,7 @@ extension CameraService {
 
 private extension CameraService {
     func allBackDeviceTypes() -> [AVCaptureDevice.DeviceType] {
-        [.builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera, .builtInWideAngleCamera,.builtInUltraWideCamera,.builtInTelephotoCamera]
+        [.builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera, .builtInWideAngleCamera, .builtInUltraWideCamera, .builtInTelephotoCamera]
     }
     
     //    func loadAvaibileDevices(forSettings: VideoSettings) -> [AVCaptureDevice] {
@@ -526,7 +536,7 @@ private extension CameraService {
 }
 
 struct VideoSettings {
-    let value : CaptureQualityPreset
+    let value: CaptureQualityPreset
     
     enum CaptureQualityPreset: Equatable {
         case v720p30fps
@@ -576,7 +586,7 @@ struct VideoSettings {
     let frameRate: CMTimeScale
     let width: Int32
     let height: Int32
-    init(type:CaptureQualityPreset, codec: AVVideoCodecType, fileType: AVFileType) {
+    init(type: CaptureQualityPreset, codec: AVVideoCodecType, fileType: AVFileType) {
         self.value = type
         self.codec = codec
         self.fileType = fileType
@@ -598,8 +608,8 @@ struct VideoSettings {
 private extension AVCaptureDevice {
     func findFormat(fps: Double, width: Int32, height: Int32) -> Format? {
         
-        self.formats.first{ format in
-            format.videoSupportedFrameRateRanges.contains{ range in
+        self.formats.first { format in
+            format.videoSupportedFrameRateRanges.contains { range in
                 range.minFrameRate <= fps && fps <= range.maxFrameRate
             }
             && format.formatDescription.dimensions.width == width

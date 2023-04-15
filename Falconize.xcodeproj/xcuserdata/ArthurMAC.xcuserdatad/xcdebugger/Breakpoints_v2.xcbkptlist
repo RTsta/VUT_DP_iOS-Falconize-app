@@ -110,8 +110,8 @@
             filePath = "Falconize/PosePredictor.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "37"
-            endingLineNumber = "37"
+            startingLineNumber = "49"
+            endingLineNumber = "49"
             landmarkName = "captureOutput(_:didOutput:from:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -142,8 +142,8 @@
             filePath = "Falconize/PosePredictor.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "67"
-            endingLineNumber = "67"
+            startingLineNumber = "136"
+            endingLineNumber = "136"
             landmarkName = "countActions(bodyParts:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -158,8 +158,8 @@
             filePath = "Falconize/PosePredictor.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "72"
-            endingLineNumber = "72"
+            startingLineNumber = "141"
+            endingLineNumber = "141"
             landmarkName = "countActions(bodyParts:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -348,8 +348,8 @@
             filePath = "Falconize/CameraView/CameraService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "614"
-            endingLineNumber = "614"
+            startingLineNumber = "615"
+            endingLineNumber = "615"
             landmarkName = "changeFrameRate(toFPS:)"
             landmarkType = "7">
             <Locations>
@@ -396,8 +396,8 @@
             filePath = "Falconize/CameraView/CameraService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "278"
-            endingLineNumber = "278"
+            startingLineNumber = "279"
+            endingLineNumber = "279"
             landmarkName = "changeDevice(for:withFPS:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -412,8 +412,8 @@
             filePath = "Falconize/CameraView/CameraService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "362"
-            endingLineNumber = "362"
+            startingLineNumber = "363"
+            endingLineNumber = "363"
             landmarkName = "focus(at:)"
             landmarkType = "7">
          </BreakpointContent>

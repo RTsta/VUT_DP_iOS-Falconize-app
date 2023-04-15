@@ -10,7 +10,13 @@ import Vision
 import AVFoundation
 import Combine
 
+typealias FalconizedPoseClasifier = Falconized_PoseModel
+
 class PosePredictor: NSObject, ObservableObject {
+    struct ClasifierResult {
+        let label: String
+        let convidence: Double
+    }
     let sequenceHandler = VNSequenceRequestHandler()
     @Published var bodyParts: [VNHumanBodyPoseObservation.JointName: VNRecognizedPoint]?
     var subscriptions = Set<AnyCancellable>()
@@ -20,7 +26,13 @@ class PosePredictor: NSObject, ObservableObject {
     @Published var actionCount: Int = 0
     @Published var evenAction: Bool = true
     
+    @Published var poseClasification: ClasifierResult?
+    
+    var predictionWindowSize = 60 // TODO: dependend on quality
+    var poseWindow: [VNHumanBodyPoseObservation] = []
+    
     override init() {
+        poseWindow.reserveCapacity(predictionWindowSize)
         super.init()
         $bodyParts
             .dropFirst()
@@ -43,15 +55,72 @@ extension PosePredictor: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     func detectedBodyPose(request: VNRequest, error: Error?) {
-        guard let bodyPoseResults = request.results as? [VNHumanBodyPoseObservation] else {
+        guard let bodyPoseResults = request.results as? [VNHumanBodyPoseObservation],
+              let bodyPoseResult = bodyPoseResults.first else {
             return
         }
-        let bodyParts = try? bodyPoseResults.first?.recognizedPoints(.all)
+        let bodyParts = try? bodyPoseResult.recognizedPoints(.all)
         
         
         DispatchQueue.main.async {
             self.bodyParts = bodyParts
         }
+        storeObservation(bodyPoseResult)
+        
+        labelActionType()
+    }
+    
+    func labelActionType() {
+        guard let throwingClasifier = try? FalconizedPoseClasifier(configuration: MLModelConfiguration()),
+              let poseMultiArray = prepareInputWithObservations(poseWindow),
+              let predictions = try? throwingClasifier.prediction(poses: poseMultiArray)
+        else { return }
+        
+        let label = predictions.label
+        let confidence = predictions.labelProbabilities[label] ?? 0
+        DispatchQueue.main.async { [weak self] in
+            self?.poseClasification = ClasifierResult(label: label, convidence: confidence)
+        }
+        
+    }
+    
+    func prepareInputWithObservations(_ observations: [VNHumanBodyPoseObservation]) -> MLMultiArray? {
+        let numberAvaibileFrames = observations.count
+        let observationsNeeded = predictionWindowSize
+        var multiArrayBuffer = [MLMultiArray]()
+        
+        for frameIndex in 0 ..< min(numberAvaibileFrames, observationsNeeded) {
+            let pose = observations[frameIndex]
+            do {
+                let oneFrameMultiArray = try pose.keypointsMultiArray()
+                multiArrayBuffer.append(oneFrameMultiArray)
+            } catch { continue }
+        }
+        
+        if numberAvaibileFrames < observationsNeeded {
+            for _ in 0 ..< (observationsNeeded - numberAvaibileFrames) {
+                do {
+                    let oneFrameMultiArray = try MLMultiArray(shape: [1, 3, 18], dataType: .double)
+                    try resetMultiArray(oneFrameMultiArray)
+                    multiArrayBuffer.append(oneFrameMultiArray)
+                } catch {
+                    continue
+                }
+            }
+        }
+        return MLMultiArray(concatenating: [MLMultiArray](multiArrayBuffer), axis: 0, dataType: .float)
+    }
+    
+    private func resetMultiArray(_ predictionWindow: MLMultiArray, with value: Double = 0.0) throws {
+        let pointer = try UnsafeMutableBufferPointer<Double>(predictionWindow)
+        pointer.initialize(repeating: value)
+    }
+    
+    func storeObservation(_ observation: VNHumanBodyPoseObservation) {
+        if poseWindow.count >= predictionWindowSize {
+            poseWindow.removeFirst()
+        }
+        poseWindow.append(observation)
     }
     
     func countActions(bodyParts: [VNHumanBodyPoseObservation.JointName: VNRecognizedPoint]?) {
