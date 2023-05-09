@@ -13,7 +13,7 @@ class VideoCapture: NSObject {
     let captureSession = AVCaptureSession()
     let videoOutput = AVCaptureVideoDataOutput()
     
-    override init(){
+    override init() {
         super.init()
         guard let captureDevice = AVCaptureDevice.default(for: .video),
               let input = try? AVCaptureDeviceInput(device: captureDevice)
@@ -25,7 +25,7 @@ class VideoCapture: NSObject {
         videoOutput.alwaysDiscardsLateVideoFrames = true
     }
     
-    func startCaptureSession(){
+    func startCaptureSession() {
         sessionQueue.async { [unowned self] in
             captureSession.startRunning()
         }
@@ -37,7 +37,7 @@ class VideoCapture: NSObject {
 // MARK: - VideoCapture - AVCaptureVideo DataOutputSampleBufferDelegate
 extension VideoCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        //predictor.estimation(sampleBuffer: sampleBuffer)
+        // predictor.estimation(sampleBuffer: sampleBuffer)
     }
     
 }
