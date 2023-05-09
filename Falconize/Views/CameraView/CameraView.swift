@@ -42,6 +42,7 @@ struct CameraView: View {
                     HStack {
                         resetButton
                         flashButton
+                        autoCaptureButton
                         Spacer()
                         Toggle(isOn: $debugMode) {
                             
@@ -77,7 +78,7 @@ struct CameraView: View {
             AppDelegate.orientationLock = .all
         }
         .onChange(of: posePredictor.evenAction) { evenAction in
-            if !debugMode {
+            if !debugMode && cameraViewModel.isAutoCaptureOn {
                 cameraViewModel.captureAction()
             }
             // if !evenAction && !debugMode {
@@ -207,6 +208,22 @@ struct CameraView: View {
                     .opacity(0.7)
                 Text("FPS+")
                     .foregroundColor(cameraViewModel.isSlowModeOn ? Color.black : Color.white)
+            }})
+    }
+    
+    @ViewBuilder
+    var autoCaptureButton: some View {
+        Button(action: {
+            cameraViewModel.autoCapture()
+        },
+               label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .frame(width: 60, height: 40)
+                    .foregroundColor(cameraViewModel.isAutoCaptureOn ? Color.yellow : Color.black)
+                    .opacity(0.7)
+                Image(systemName: "figure.walk.motion")
+                    .foregroundColor(cameraViewModel.isAutoCaptureOn ? Color.black : Color.white)
             }})
     }
     

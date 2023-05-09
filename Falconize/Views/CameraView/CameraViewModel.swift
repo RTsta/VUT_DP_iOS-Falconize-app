@@ -14,6 +14,7 @@ final class CameraViewModel: ObservableObject {
     @Published var isFlashOn = false
     @Published var isSlowModeOn = false
     @Published var isHistoryCaptureReady: Bool = false
+    @Published var isAutoCaptureOn = false
     
     private var inputDevice: AVCaptureDevice?
     
@@ -92,6 +93,10 @@ final class CameraViewModel: ObservableObject {
     
     func captureAction() {
         service.captureAction()
+    }
+    
+    func autoCapture() {
+        self.isAutoCaptureOn.toggle()
     }
     
     func flipCamera() {
