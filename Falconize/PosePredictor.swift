@@ -57,6 +57,9 @@ extension PosePredictor: AVCaptureVideoDataOutputSampleBufferDelegate {
     func detectedBodyPose(request: VNRequest, error: Error?) {
         guard let bodyPoseResults = request.results as? [VNHumanBodyPoseObservation],
               let bodyPoseResult = bodyPoseResults.first else {
+            DispatchQueue.main.async {
+                self.bodyParts = nil
+            }
             return
         }
         let bodyParts = try? bodyPoseResult.recognizedPoints(.all)
