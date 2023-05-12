@@ -34,26 +34,18 @@ struct CameraView: View {
                     .transition(.opacity)
             }
             VStack {
-                
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
+                ZStack {                    RoundedRectangle(cornerRadius: 20)
                         .opacity(0.3)
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                     HStack {
-                        resetButton
                         flashButton
                         autoCaptureButton
                         Spacer()
-                        Toggle(isOn: $debugMode) {
-                            
-                        }.onChange(of: debugMode) { _ in
-                            myDebugPrint(debugMode)
-                        }
                         frameRateButton
                         switchButton
-                    }.padding(3)
+                    }.padding([.all], 2)
                 }
-                .padding([.trailing, .leading], 10)
+                .padding([.trailing, .leading], 5)
                 .frame(height: 40)
                 .fixedSize(horizontal: false, vertical: true)
                 debuggingUI
@@ -62,11 +54,12 @@ struct CameraView: View {
                 ZStack {
                     testCaptureButton
                         
-//                    HStack {
+                   HStack {
+                       debugButton
 //                        recordButton
-//                        Spacer()
+                        Spacer()
 //                        captureButton
-//                    }.padding()
+                    }.padding()
                 }
             }
         }
@@ -79,7 +72,7 @@ struct CameraView: View {
         }
         .onChange(of: posePredictor.evenAction) { evenAction in
             if !debugMode && cameraViewModel.isAutoCaptureOn {
-                cameraViewModel.captureAction()
+                //cameraViewModel.captureAction()
             }
             // if !evenAction && !debugMode {
             //    myDebugPrint("Recording starting")
@@ -107,6 +100,10 @@ struct CameraView: View {
             VStack {
                 PoseTextView(posePredictor: posePredictor)
                 ConsoleLogText()
+                HStack{
+                    Spacer()
+                    resetButton.padding([.trailing], 15).padding([.bottom], 3)
+                }
             }
         }.frame(maxHeight: 150)
     }
@@ -114,6 +111,7 @@ struct CameraView: View {
     
     @ViewBuilder var cameraPreview: some View {
         GeometryReader { geometry in
+            
             CameraPreview(session: cameraViewModel.session, view: cameraViewModel.previewView)
                 .onAppear {
                     cameraViewModel.configure()
@@ -228,6 +226,23 @@ struct CameraView: View {
     }
     
     @ViewBuilder
+    var debugButton: some View {
+        Button(action: {
+            debugMode.toggle()
+        },
+               label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .frame(width: 60, height: 40)
+                    .foregroundColor(debugMode ? Color.yellow : Color.black)
+                    .opacity(0.7)
+                Image(systemName: "ladybug.fill")
+                    .foregroundColor(debugMode ? Color.black : Color.white)
+            }})
+    }
+    
+    
+    @ViewBuilder
     var testCaptureButton: some View {
         Button(action: {
             cameraViewModel.captureAction()
@@ -333,9 +348,6 @@ struct CameraView: View {
 // MARK: - Preview
 struct CameraView_Previews: PreviewProvider {
     static var previews: some View {
-        ZStack {
-            Rectangle().foregroundColor(Color.black).scaledToFill().ignoresSafeArea()
             CameraView()
-        }
     }
 }
