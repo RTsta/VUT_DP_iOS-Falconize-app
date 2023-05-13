@@ -12,7 +12,7 @@ struct CameraView: View {
     @StateObject var posePredictor = PosePredictor()
     @State var recording: Bool = false
     
-    @State var debugMode: Bool = true
+    @State var debugMode: Bool = false
     @State private var showFocusPoint = false
     
     @State var testOpacity = 0.5
@@ -20,6 +20,7 @@ struct CameraView: View {
     @State var displayZoom = 1.0
     @State var tapFocusPoint: CGPoint = .init()
     
+    private var triggeringActions: [String] = ["golf_swing"]
     
     var body: some View {
         ZStack {
@@ -70,10 +71,18 @@ struct CameraView: View {
         .onDisappear {
             AppDelegate.orientationLock = .all
         }
-        .onChange(of: posePredictor.evenAction) { evenAction in
-            if !debugMode && cameraViewModel.isAutoCaptureOn {
-                //cameraViewModel.captureAction()
+        .onChange(of: posePredictor.poseClasification) { clasification in
+            guard let clasification = clasification else {
+                return
             }
+            if !debugMode && cameraViewModel.isAutoCaptureOn {
+                if triggeringActions.contains(where: {clasification.label == $0})  && clasification.convidence > 0.7 {
+                    myDebugPrint("Action \(clasification.label) captured!")
+                    cameraViewModel.captureAction()
+                }
+            }
+            
+            // tento kód má na starosti bezdotykové ovládání
             // if !evenAction && !debugMode {
             //    myDebugPrint("Recording starting")
             //    recording.toggle()

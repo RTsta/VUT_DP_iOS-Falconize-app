@@ -13,7 +13,7 @@ import Combine
 typealias FalconizedPoseClasifier = Falconized_PoseModel
 
 class PosePredictor: NSObject, ObservableObject {
-    struct ClasifierResult {
+    struct ClasifierResult: Equatable {
         let label: String
         let convidence: Double
     }
