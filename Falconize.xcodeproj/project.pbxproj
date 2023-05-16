@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8F377AAE29D4CFB900475615 /* FocusPointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F377AAD29D4CFB900475615 /* FocusPointView.swift */; };
 		8F5D3777291A9FA50073F105 /* StickFigureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5D3776291A9FA50073F105 /* StickFigureView.swift */; };
+		8F918CD02A13DF6500A110FA /* VideoSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F918CCF2A13DF6500A110FA /* VideoSettings.swift */; };
 		8FB81DA9292EAFB000AA73FD /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DA8292EAFB000AA73FD /* CameraView.swift */; };
 		8FB81DAB2930166200AA73FD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DAA2930166200AA73FD /* AppDelegate.swift */; };
 		8FB81DBC29315A4000AA73FD /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB81DBB29315A4000AA73FD /* CameraService.swift */; };
@@ -19,7 +20,6 @@
 		8FC3CF9828E5CD2E009917F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9728E5CD2E009917F4 /* Assets.xcassets */; };
 		8FC3CF9B28E5CD2E009917F4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */; };
 		8FCD220B2989B74B00B5571C /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCD220A2989B74B00B5571C /* PhotoCaptureProcessor.swift */; };
-		8FD7081329BA832200857334 /* SwitchLensButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD7081229BA832100857334 /* SwitchLensButtons.swift */; };
 		8FE86D9529DDAD3A00AB5BF6 /* Falconized_PoseModel.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 8FE86D9429DDAD3A00AB5BF6 /* Falconized_PoseModel.mlmodel */; };
 		8FEB5375298AB39C00BBB854 /* VideoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEB5374298AB39C00BBB854 /* VideoCaptureProcessor.swift */; };
 		8FEB5377298C7DAA00BBB854 /* CaptureHistoryProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEB5376298C7DAA00BBB854 /* CaptureHistoryProcessor.swift */; };
@@ -30,6 +30,7 @@
 /* Begin PBXFileReference section */
 		8F377AAD29D4CFB900475615 /* FocusPointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusPointView.swift; sourceTree = "<group>"; };
 		8F5D3776291A9FA50073F105 /* StickFigureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickFigureView.swift; sourceTree = "<group>"; };
+		8F918CCF2A13DF6500A110FA /* VideoSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoSettings.swift; sourceTree = "<group>"; };
 		8FB81DA8292EAFB000AA73FD /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		8FB81DAA2930166200AA73FD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8FB81DBB29315A4000AA73FD /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
@@ -42,7 +43,6 @@
 		8FC3CF9A28E5CD2E009917F4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8FCD220929897EB800B5571C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8FCD220A2989B74B00B5571C /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
-		8FD7081229BA832100857334 /* SwitchLensButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchLensButtons.swift; sourceTree = "<group>"; };
 		8FE86D9429DDAD3A00AB5BF6 /* Falconized_PoseModel.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = Falconized_PoseModel.mlmodel; sourceTree = "<group>"; };
 		8FEB5374298AB39C00BBB854 /* VideoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCaptureProcessor.swift; sourceTree = "<group>"; };
 		8FEB5376298C7DAA00BBB854 /* CaptureHistoryProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureHistoryProcessor.swift; sourceTree = "<group>"; };
@@ -76,9 +76,16 @@
 			children = (
 				8FB81DC029316EFB00AA73FD /* CameraPreview.swift */,
 				8F377AAD29D4CFB900475615 /* FocusPointView.swift */,
-				8FD7081229BA832100857334 /* SwitchLensButtons.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		8F918CCE2A13DF5200A110FA /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				8F918CCF2A13DF6500A110FA /* VideoSettings.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 		8FB81DBD29316BDD00AA73FD /* CameraView */ = {
@@ -115,6 +122,7 @@
 				8FCD220929897EB800B5571C /* Info.plist */,
 				8FC3CF9328E5CD2D009917F4 /* FalconizeApp.swift */,
 				8FB81DAA2930166200AA73FD /* AppDelegate.swift */,
+				8F918CCE2A13DF5200A110FA /* Model */,
 				8FE1D3B129EAB7C20012E835 /* Views */,
 				8FF252742918845000BFA014 /* PosePredictor.swift */,
 				8FEB53782991C9CE00BBB854 /* myUtil.swift */,
@@ -214,6 +222,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		8FEB537B2992D05600BBB854 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -248,10 +257,10 @@
 				8FC3CF9628E5CD2D009917F4 /* ContentView.swift in Sources */,
 				8FE86D9529DDAD3A00AB5BF6 /* Falconized_PoseModel.mlmodel in Sources */,
 				8FC3CF9428E5CD2D009917F4 /* FalconizeApp.swift in Sources */,
+				8F918CD02A13DF6500A110FA /* VideoSettings.swift in Sources */,
 				8FCD220B2989B74B00B5571C /* PhotoCaptureProcessor.swift in Sources */,
 				8FF252752918845000BFA014 /* PosePredictor.swift in Sources */,
 				8FEB5375298AB39C00BBB854 /* VideoCaptureProcessor.swift in Sources */,
-				8FD7081329BA832200857334 /* SwitchLensButtons.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

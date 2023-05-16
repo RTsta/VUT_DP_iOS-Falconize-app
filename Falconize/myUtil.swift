@@ -7,11 +7,13 @@
 
 import Foundation
 import SwiftUI
-// swiftlint:disable force_try
+
+/// global declaration for Notification string used for printing on custom debugView
 extension Notification.Name {
     static let myDebugPrintNotification = Notification.Name("myDebugPrintNotification")
 }
 
+/// formated printing for debug purposes
 func myDebugPrint(_ something: Any, _ title: String = "", onScreen: Bool = false) {
     print("*********** \(title) ***********")
     print("\(something)")
@@ -25,20 +27,13 @@ func myDebugPrint(_ something: Any, _ title: String = "", onScreen: Bool = false
     }
 }
 
+
+/// formated print error
 func myErrorPrint(_ something: Any) {
     print("!!! Error !!! \(something)")
 }
 
-
-func testButton() -> some View {
-    Button("Test") {
-        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        
-        print(try! FileManager.default.contentsOfDirectory(at: url!, includingPropertiesForKeys: nil) as Any)
-    }
-}
-
-
+/// view for displaying prins in app
 struct ConsoleLogText: View {
     @State private var consoleText: String = ""
     var body: some View {
@@ -55,6 +50,8 @@ struct ConsoleLogText: View {
     }
 }
 
+
+/// view for displaying debug information from posePredictor
 struct PoseTextView: View {
     @ObservedObject var posePredictor: PosePredictor
     
@@ -79,4 +76,3 @@ struct PoseTextView_Previews: PreviewProvider {
         PoseTextView(posePredictor: PosePredictor())
     }
 }
-// swiftlint:enable force_try

@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// entry view to the app
 struct ContentView: View {
     var body: some View {
         CameraView()

@@ -12,7 +12,9 @@ import Combine
 
 typealias FalconizedPoseClasifier = Falconized_PoseModel
 
+// MARK: PosePredictor
 class PosePredictor: NSObject, ObservableObject {
+    /// Struct for results of labels
     struct ClasifierResult: Equatable {
         let label: String
         let convidence: Double
@@ -28,7 +30,7 @@ class PosePredictor: NSObject, ObservableObject {
     
     @Published var poseClasification: ClasifierResult?
     
-    var predictionWindowSize = 60 // TODO: dependend on quality
+    var predictionWindowSize = 60 // FIXME: shold dependend on quality of video, not constant
     var poseWindow: [VNHumanBodyPoseObservation] = []
     
     override init() {
@@ -43,6 +45,7 @@ class PosePredictor: NSObject, ObservableObject {
 }
 
 extension PosePredictor: AVCaptureVideoDataOutputSampleBufferDelegate {
+    /// Tag: didOutput
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         let humanBodyRequest = VNDetectHumanBodyPoseRequest(completionHandler: detectedBodyPose)
         
@@ -73,6 +76,7 @@ extension PosePredictor: AVCaptureVideoDataOutputSampleBufferDelegate {
         labelActionType()
     }
     
+    /// Label observed pose based on CoreML model
     func labelActionType() {
         guard let throwingClasifier = try? FalconizedPoseClasifier(configuration: MLModelConfiguration()),
               let poseMultiArray = prepareInputWithObservations(poseWindow),
