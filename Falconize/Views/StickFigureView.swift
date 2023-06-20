@@ -13,6 +13,10 @@ struct StickFigureView: View {
         var points: [CGPoint]
         var size: CGSize
         
+        /// <#Description#>
+        ///
+        /// - Parameter value: <#value description#>
+        /// - Returns: <#return value description#>
         func path(in rect: CGRect) -> Path {
             var path = Path()
             path.move(to: points[0])

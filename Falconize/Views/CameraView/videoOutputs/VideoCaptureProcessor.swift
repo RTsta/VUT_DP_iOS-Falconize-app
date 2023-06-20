@@ -80,26 +80,19 @@ extension VideoCaptureProcessor: AVCaptureFileOutputRecordingDelegate {
     }
     
     private func saveInPhotoLibrary(_ url: URL) {
-        PHPhotoLibrary.shared().performChanges({
+        PHPhotoLibrary.shared().performChanges {
             // add video to PhotoLibrary here
             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { completed, error in
+        } completionHandler: { completed, error in
             if completed {
                 print("save complete! path : " + url.absoluteString)
                 return
             } else {
-                print("save failed")
+                myErrorPrint("save failed -- \(error?.localizedDescription ?? "")")
+                print()
                 return
             }
         }
     }
     
     }
-
-
-// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
-extension VideoCaptureProcessor: AVCaptureVideoDataOutputSampleBufferDelegate {
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        return
-    }
-}

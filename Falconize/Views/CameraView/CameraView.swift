@@ -12,7 +12,7 @@ struct CameraView: View {
     @StateObject var posePredictor = PosePredictor()
     @State var recording: Bool = false
     
-    @State var debugMode: Bool = true
+    @State var debugMode: Bool = false
     @State private var showFocusPoint = false
     
     @State var testOpacity = 0.5
@@ -20,6 +20,7 @@ struct CameraView: View {
     @State var displayZoom = 1.0
     @State var tapFocusPoint: CGPoint = .init()
     
+    private var triggeringActions: [String] = ["golf_swing"]
     
     var body: some View {
         ZStack {
@@ -27,40 +28,17 @@ struct CameraView: View {
                 cameraPreview
                 gridView
             }
-            if showFocusPoint {
-                FocusPointView()
-                    .frame(width: 100, height: 100)
-                    .position(tapFocusPoint)
-                    .transition(.opacity)
-            }
+            focusPointRectangle
+            
             VStack {
-                ZStack {                    RoundedRectangle(cornerRadius: 20)
-                        .opacity(0.3)
-                        .foregroundColor(.white)
-                    HStack {
-                        flashButton
-                        autoCaptureButton
-                        Spacer()
-                        frameRateButton
-                        switchButton
-                    }.padding([.all], 2)
-                }
-                .padding([.trailing, .leading], 5)
-                .frame(height: 40)
-                .fixedSize(horizontal: false, vertical: true)
+                topButtonBar
+                    .padding([.trailing, .leading], 5)
+                    .frame(height: 40)
+                    .fixedSize(horizontal: false, vertical: true)
                 debuggingUI
                 Spacer().layoutPriority(2)
-                switchLensButtons
-                ZStack {
-                    testCaptureButton
-                        
-                   HStack {
-                       debugButton
-//                        recordButton
-                        Spacer()
-//                        captureButton
-                    }.padding()
-                }
+                zoomPresetsButtons
+                bottomButtonBar
             }
         }
         .onAppear {
@@ -70,46 +48,63 @@ struct CameraView: View {
         .onDisappear {
             AppDelegate.orientationLock = .all
         }
-        .onChange(of: posePredictor.evenAction) { evenAction in
-            if !debugMode && cameraViewModel.isAutoCaptureOn {
-                //cameraViewModel.captureAction()
+        .onChange(of: posePredictor.poseClasification) { clasification in
+            // reacting to changes of pose clasification label
+            guard let clasification = clasification else {
+                return
             }
-            // if !evenAction && !debugMode {
-            //    myDebugPrint("Recording starting")
-            //    recording.toggle()
-            //    cameraViewModel.startVideoRecording()
-            // } else {
-            //    myDebugPrint("Recording stopping")
-            //    recording.toggle()
-            //    cameraViewModel.stopVideoRecording()
-            // }
+            if !debugMode && cameraViewModel.isAutoCaptureOn {
+                if triggeringActions.contains(where: { clasification.label == $0 })  && clasification.convidence > 0.7 {
+                    myDebugPrint("Action \(clasification.label) captured!")
+                    cameraViewModel.captureAction()
+                }
+            }
         }.background(.black)
         
     }
     
-    @ViewBuilder var debuggingUI: some View {
+    @ViewBuilder
+    var debuggingUI: some View {
         if debugMode {
-        ZStack {
-            RoundedRectangle(cornerRadius: 44)
-                .foregroundColor(.white)
-                .opacity(testOpacity)
-                .ignoresSafeArea()
-                .onTapGesture { _ in
-                    testOpacity = (testOpacity > 0.5 ? 0.5 : 1.0)
+            ZStack {
+                RoundedRectangle(cornerRadius: 44)
+                    .foregroundColor(.white)
+                    .opacity(testOpacity)
+                    .ignoresSafeArea()
+                    .onTapGesture { _ in
+                        testOpacity = (testOpacity > 0.5 ? 0.5 : 1.0)
+                    }
+                VStack {
+                    PoseTextView(posePredictor: posePredictor)
+                    ConsoleLogText()
+                    HStack {
+                        Spacer()
+                        resetButton.padding([.trailing], 15).padding([.bottom], 3)
+                    }
                 }
-            VStack {
-                PoseTextView(posePredictor: posePredictor)
-                ConsoleLogText()
-                HStack{
-                    Spacer()
-                    resetButton.padding([.trailing], 15).padding([.bottom], 3)
-                }
-            }
-        }.frame(maxHeight: 150)
-    }
+            }.frame(maxHeight: 150)
+        }
     }
     
-    @ViewBuilder var cameraPreview: some View {
+    @ViewBuilder
+    var resetButton: some View {
+        Button {
+            posePredictor.actionCount = 0
+            
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .frame(width: 60, height: 40)
+                    .foregroundColor( Color.black )
+                    .opacity(0.7)
+                Image(systemName: "arrow.counterclockwise")
+                    .foregroundColor(Color.white)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var cameraPreview: some View {
         GeometryReader { geometry in
             
             CameraPreview(session: cameraViewModel.session, view: cameraViewModel.previewView)
@@ -141,7 +136,7 @@ struct CameraView: View {
                     let convertedPoint = cameraViewModel.previewView.videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
                     cameraViewModel.focus(at: convertedPoint)
                     
-                        self.showFocusPoint.toggle()
+                    self.showFocusPoint.toggle()
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         withAnimation(.linear(duration: 1)) {
                             self.showFocusPoint.toggle()
@@ -152,53 +147,58 @@ struct CameraView: View {
         }
     }
     
-    @ViewBuilder var gridView: some View {
+    @ViewBuilder
+    var gridView: some View {
         EmptyView()
     }
     
-    // MARK: - Buttons
     @ViewBuilder
-    var recordButton: some View {
-        Button(action: {
-            (!recording && !debugMode ? cameraViewModel.startVideoRecording(): cameraViewModel.stopVideoRecording())
-            recording.toggle()
-        }, label: {ZStack {
-            Circle()
-                .foregroundColor(recording ? Color.red : Color.white)
-                .frame(width: 70, height: 70)
-            
-            Circle()
-                .stroke(Color.white, lineWidth: 2)
-                .frame(width: 80, height: 80)
-            
-            (recording ? Image(systemName: "pause.fill"): Image(systemName: "play.fill")).foregroundColor(Color.black)
-            
-        }})
+    var focusPointRectangle: some View {
+        if showFocusPoint {
+            FocusPointView()
+                .frame(width: 100, height: 100)
+                .position(tapFocusPoint)
+                .transition(.opacity)
+        }
+    }
+    
+    // MARK: - Bars
+    @ViewBuilder
+    var topButtonBar: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20)
+                .opacity(0.3)
+                .foregroundColor(.white)
+            HStack {
+                flashButton
+                autoCaptureButton
+                Spacer()
+                frameRateButton
+                switchButton
+            }.padding([.all], 2)
+        }
     }
     
     @ViewBuilder
-    var captureButton: some View {
-        Button(action: {
-            if !debugMode {
-                cameraViewModel.capturePhoto()
-            }
-        }, label: {ZStack {
-            Circle()
-                .foregroundColor(Color.white)
-                .frame(width: 40, height: 40)
-            
-            Circle()
-                .stroke(Color.white, lineWidth: 2)
-                .frame(width: 50, height: 50)
-        }})
+    var bottomButtonBar: some View {
+        ZStack {
+            captureVideoWithHistoryButton
+            HStack {
+                // recordButton
+                debugButton
+                Spacer()
+                // captureButton
+            }.padding()
+        }
     }
+    
+    // MARK: - Top buttons
     
     @ViewBuilder
     var frameRateButton: some View {
-        Button(action: {
+        Button {
             cameraViewModel.switchSlowMode()
-        },
-               label: {
+        } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: 20)
                     .frame(width: 60, height: 40)
@@ -206,63 +206,14 @@ struct CameraView: View {
                     .opacity(0.7)
                 Text("FPS+")
                     .foregroundColor(cameraViewModel.isSlowModeOn ? Color.black : Color.white)
-            }})
-    }
-    
-    @ViewBuilder
-    var autoCaptureButton: some View {
-        Button(action: {
-            cameraViewModel.autoCapture()
-        },
-               label: {
-            ZStack {
-                RoundedRectangle(cornerRadius: 20)
-                    .frame(width: 60, height: 40)
-                    .foregroundColor(cameraViewModel.isAutoCaptureOn ? Color.yellow : Color.black)
-                    .opacity(0.7)
-                Image(systemName: "figure.walk.motion")
-                    .foregroundColor(cameraViewModel.isAutoCaptureOn ? Color.black : Color.white)
-            }})
-    }
-    
-    @ViewBuilder
-    var debugButton: some View {
-        Button(action: {
-            debugMode.toggle()
-        },
-               label: {
-            ZStack {
-                RoundedRectangle(cornerRadius: 20)
-                    .frame(width: 60, height: 40)
-                    .foregroundColor(debugMode ? Color.yellow : Color.black)
-                    .opacity(0.7)
-                Image(systemName: "ladybug.fill")
-                    .foregroundColor(debugMode ? Color.black : Color.white)
-            }})
-    }
-    
-    
-    @ViewBuilder
-    var testCaptureButton: some View {
-        Button(action: {
-            cameraViewModel.captureAction()
-        }, label: {ZStack {
-            Circle()
-                .foregroundColor(Color.white)
-                .frame(width: 60, height: 60)
-            
-            Circle()
-                .stroke((cameraViewModel.isHistoryCaptureReady ? Color.green : Color.red), lineWidth: 2)
-                .frame(width: 70, height: 70)
-        }})
+            }}
     }
     
     @ViewBuilder
     var switchButton: some View {
-        Button(action: {
+        Button {
             cameraViewModel.flipCamera()
-        },
-               label: {
+        } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: 20)
                     .frame(width: 60)
@@ -270,43 +221,41 @@ struct CameraView: View {
                     .opacity(0.7)
                 Image(systemName: "arrow.triangle.2.circlepath.camera")
                     .foregroundColor(Color.white)
-            }})
+            }}
     }
     
     @ViewBuilder
     var flashButton: some View {
-        Button(action: {
+        Button {
             cameraViewModel.switchFlash()
-        },
-               label: {
+        } label: {
             ZStack {
                 Circle()
                     .foregroundColor(Color.black)
                     .opacity(0.7)
                 Image(systemName: cameraViewModel.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
                     .foregroundColor(Color.white)
-            }})
+            }}
     }
     
     @ViewBuilder
-    var resetButton: some View {
-        Button(action: {
-            posePredictor.actionCount = 0
-            
-        }, label: {
+    var autoCaptureButton: some View {
+        Button {
+            cameraViewModel.autoCapture()
+        } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: 20)
                     .frame(width: 60, height: 40)
-                    .foregroundColor(Color.black)
+                    .foregroundColor(cameraViewModel.isAutoCaptureOn ? Color.yellow : Color.black)
                     .opacity(0.7)
-                Image(systemName: "arrow.counterclockwise")
-                    .foregroundColor(Color.white)
-            }
-        })
+                Image(systemName: "figure.walk.motion")
+                    .foregroundColor(cameraViewModel.isAutoCaptureOn ? Color.black : Color.white)
+            }}
     }
     
+    // MARK: Bottom buttons
     @ViewBuilder
-    var switchLensButtons: some View {
+    var zoomPresetsButtons: some View {
         let presets = cameraViewModel.isSlowModeOn ? cameraViewModel.zoomPresetsSlowMo : cameraViewModel.zoomPresets
         
         if presets.count > 1 {
@@ -318,9 +267,9 @@ struct CameraView: View {
                     ForEach(presets.indices, id: \.self) { index in
                         let preset = presets[index]
                         let nextPreset: CGFloat = index+1 < presets.count ? presets[index + 1] : .infinity
-                        Button(action: {
+                        Button {
                             cameraViewModel.zoom(with: preset)
-                        }) {
+                        } label: {
                             ZStack {
                                 Circle()
                                     .foregroundColor(.black)
@@ -332,7 +281,7 @@ struct CameraView: View {
                                         .foregroundColor(.yellow)
                                 }
                             }
-                                
+                            
                         }
                         .padding(3)
                         .opacity(0.8)
@@ -343,11 +292,79 @@ struct CameraView: View {
             .fixedSize()
         }
     }
+    
+    @ViewBuilder
+    var debugButton: some View {
+        Button {
+            debugMode.toggle()
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .frame(width: 60, height: 40)
+                    .foregroundColor(debugMode ? Color.yellow : Color.black)
+                    .opacity(0.7)
+                Image(systemName: "ladybug.fill")
+                    .foregroundColor(debugMode ? Color.black : Color.white)
+            }}
+    }
+    
+    // MARK: Capture buttons
+    @ViewBuilder
+    var captureVideoWithHistoryButton: some View {
+        Button {
+            cameraViewModel.captureAction()
+        } label: {ZStack {
+            Circle()
+                .foregroundColor(Color.white)
+                .frame(width: 60, height: 60)
+            
+            Circle()
+                .stroke((cameraViewModel.isHistoryCaptureReady ? Color.green : Color.red), lineWidth: 2)
+                .frame(width: 70, height: 70)
+        }}
+    }
+    
+    @ViewBuilder
+    var recordVideoButton: some View {
+        Button {
+            (!recording && !debugMode ? cameraViewModel.startVideoRecording(): cameraViewModel.stopVideoRecording())
+            recording.toggle()
+        } label: {ZStack {
+            Circle()
+                .foregroundColor(recording ? Color.red : Color.white)
+                .frame(width: 70, height: 70)
+            
+            Circle()
+                .stroke(Color.white, lineWidth: 2)
+                .frame(width: 80, height: 80)
+            
+            (recording ? Image(systemName: "pause.fill"): Image(systemName: "play.fill"))
+                .foregroundColor(Color.black)
+            
+        }}
+    }
+    
+    @ViewBuilder
+    var capturePhotoButton: some View {
+        Button {
+            if !debugMode {
+                cameraViewModel.capturePhoto()
+            }
+        } label: {ZStack {
+            Circle()
+                .foregroundColor(Color.white)
+                .frame(width: 40, height: 40)
+            
+            Circle()
+                .stroke(Color.white, lineWidth: 2)
+                .frame(width: 50, height: 50)
+        }}
+    }
 }
 
 // MARK: - Preview
 struct CameraView_Previews: PreviewProvider {
     static var previews: some View {
-            CameraView()
+        CameraView()
     }
 }

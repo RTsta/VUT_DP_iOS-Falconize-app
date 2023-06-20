@@ -29,13 +29,14 @@ final class CameraViewModel: ObservableObject {
     var previewView: VideoPreviewView
     
     private var subscriptions = Set<AnyCancellable>()
-        
+    
     init() {
         self.session = service.session
         self.previewView = VideoPreviewView()
         initSubscribers()
     }
     
+    /// set subscribers to all published proppertys of CameraService
     private func initSubscribers() {
         service.$flashMode.sink { [weak self] (mode) in
             self?.isFlashOn = mode == .on
@@ -45,6 +46,7 @@ final class CameraViewModel: ObservableObject {
             self?.isSlowModeOn = slowMode
         }.store(in: &self.subscriptions)
         
+        // finds all avaibile zoom presets for devices (virtual / normal device)
         service.$videoInputDevice.sink { [weak self] (device) in
             DispatchQueue.main.async {
                 guard let device = device?.device else {
@@ -73,41 +75,52 @@ final class CameraViewModel: ObservableObject {
         
     }
     
+}
+// MARK: CameraViewModel - CameraSession actions
+extension CameraViewModel {
+    /// Initial configuration of CameraSession
     func configure() {
         service.checkForPermissions()
         service.setupCameraSession()
         service.start()
     }
     
+    /// capturePhoto
     func capturePhoto() {
         service.capturePhoto()
     }
     
+    /// startVideoRecording
     func startVideoRecording() {
         service.startVideoRecording()
     }
     
+    /// stopVideoRecording
     func stopVideoRecording() {
         service.stopVideoRecording()
     }
     
+    /// captureAction
     func captureAction() {
         service.captureAction()
     }
     
+    /// autoCapture
     func autoCapture() {
         self.isAutoCaptureOn.toggle()
     }
     
+    /// flipCamera
     func flipCamera() {
         service.flipCamera()
     }
     
+    /// switchSlowMode - switches mode with high refresh rate
     func switchSlowMode() {
         service.switchSlowMode()
     }
     
-    
+    /// zoom
     func zoom(with zoom: CGFloat) {
         var finalZoom = zoom
         if finalZoom > maxZoomFactor {
@@ -122,14 +135,17 @@ final class CameraViewModel: ObservableObject {
 
     }
     
+    /// focus
     func focus(at focusPoint: CGPoint) {
         service.focus(at: focusPoint)
     }
     
+    /// switchFlash
     func switchFlash() {
         service.flashMode = service.flashMode == .on ? .off : .on
     }
     
+    /// addPoseDelegate
     func addPoseDelegate(delegate: PosePredictor) {
         service.addOutputDelegate(delegate: delegate)
     }

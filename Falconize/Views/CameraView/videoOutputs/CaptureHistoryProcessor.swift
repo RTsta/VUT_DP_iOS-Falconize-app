@@ -10,6 +10,7 @@ import AVFoundation
 import Photos
 import UIKit
 
+// MARK: CaptureHistoryProcessor
 class CaptureHistoryProcessor: NSObject {
     private let fileManager: FileManager = FileManager.default
     private lazy var chunksDirURL: URL = {
@@ -32,6 +33,7 @@ class CaptureHistoryProcessor: NSObject {
     
     private var videoSettings: VideoSettings
     
+    /// enumeration for errors related with CaptureHistorySession
     enum CaptureHistoryError: Error {
         case runtimeError(String)
     }
@@ -78,6 +80,7 @@ extension CaptureHistoryProcessor {
             createWriterInput(at: timeStamp)
         }
         
+        // append frame
         if let assetWriterInput = assetWriterInput, assetWriterInput.isReadyForMoreMediaData {
             if !assetWriterInput.append(buffer) {
                 myErrorPrint("\(String(describing: self )).\(#function) - Error appending assetWriterInput")
@@ -107,7 +110,7 @@ extension CaptureHistoryProcessor {
         let outputSettings: [String: Any] = [ AVVideoCodecKey: videoSettings.codec,
                                               AVVideoWidthKey: videoSettings.value.dimensions().width,
                                               AVVideoHeightKey: videoSettings.value.dimensions().height,
-                              AVVideoCompressionPropertiesKey: [ AVVideoAverageBitRateKey: CGFloat(self.videoSettings.value.dimensions().width) * CGFloat(self.videoSettings.value.dimensions().height) * bitsPerPixel,
+                              AVVideoCompressionPropertiesKey: [ AVVideoAverageBitRateKey: CGFloat(self.videoSettings.value.dimensions().width) * CGFloat(self.videoSettings.value.dimensions().height) * bitsPerPixel, // swiftlint:disable:this line_length
                                                                               AVVideoExpectedSourceFrameRateKey: self.videoSettings.value.fps(),
                                                                                   AVVideoMaxKeyFrameIntervalKey: self.videoSettings.value.fps()
                                                                ]
@@ -135,6 +138,10 @@ extension CaptureHistoryProcessor {
 
 // MARK: - AVMutableComposition
 extension CaptureHistoryProcessor {
+    
+    /// merging videos into one and saves it into camera roll
+    ///
+    /// - Parameter videoURLs: url of the videos to be merged
     private func mergeVideos(videoURLs: [URL]) async throws {
         if videoURLs.isEmpty {
             return
@@ -146,7 +153,6 @@ extension CaptureHistoryProcessor {
             throw CaptureHistoryError.runtimeError("\(String(describing: self )).\(#function) - Unable to create compositionTrack")
         }
         
-        let orientation = await UIDevice.current.orientation
         var assetTrack: AVAssetTrack?
         var previusTrackTime: CMTime = .zero
         for videoURL in videoURLs {
@@ -175,6 +181,7 @@ extension CaptureHistoryProcessor {
         }
         let videoComposition = AVMutableVideoComposition()
         
+        // Transform video, set frameRate, resolution
         videoComposition.frameDuration = CMTime(value: 1, timescale: videoSettings.frameRate)
         let instruction = AVMutableVideoCompositionInstruction()
         instruction.timeRange = CMTimeRange(start: .zero, duration: previusTrackTime)
@@ -198,6 +205,7 @@ extension CaptureHistoryProcessor {
         }
     }
     
+    /// Rotation based on current device orientation
     private func outputFinalSizeAndRotation(size: CGSize, transform: CGAffineTransform) -> (size: CGSize, transform: CGAffineTransform) {
         let deviceOrientation = UIDevice.current.orientation
         if deviceOrientation == .portrait && size.width > size.height {
@@ -212,7 +220,10 @@ extension CaptureHistoryProcessor {
             return (size, transform)
         }
     }
-    
+
+    /// export video
+    ///
+    /// - Returns: temporary URL of the video
     private func exportVideo(asset: AVAsset, videoComposition: AVVideoComposition ) async -> URL? {
         guard let export = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)
         else {
@@ -238,13 +249,14 @@ extension CaptureHistoryProcessor {
         return nil
     }
     
+    /// save to camera roll
     func saveVideoToPhotos(url videoURL: URL) {
         PHPhotoLibrary.requestAuthorization { [weak self] status in
             switch status {
                 case .authorized:
-                    PHPhotoLibrary.shared().performChanges({
+                    PHPhotoLibrary.shared().performChanges {
                         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
-                    }) { [weak self] (isSaved, error) in
+                    } completionHandler: { [weak self] (isSaved, error) in
                         if isSaved {
                             myDebugPrint("video saved", onScreen: true)
                         } else {
@@ -257,6 +269,7 @@ extension CaptureHistoryProcessor {
         }
     }
     
+    /// selects last 2 seconds and one further of the video, merges it and saves it
     func movementActionTrigged() async {
         Task {
             print("AKCE v framu \(chunkNumber)")
@@ -278,6 +291,7 @@ extension CaptureHistoryProcessor {
         }
     }
     
+    /// helper function for indexing of chunks
     private func chunkNumberIndexing(for index: Int) -> Int {
         if index >= 0 {
             return index % totalNumberOfChunks

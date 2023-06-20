@@ -31,13 +31,16 @@ class PhotoCaptureProcessor: NSObject {
     }
 }
 
+// MARK: AVCapturePhotoCaptureDelegate
+/// This extension adopts AVCapturePhotoCaptureDelegate protocol methods.
 extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
-    // This extension adopts AVCapturePhotoCaptureDelegate protocol methods.
     
+    /// willBeginCaptureFor
     func photoOutput(_ output: AVCapturePhotoOutput, willBeginCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
         maxPhotoProcessingTime = resolvedSettings.photoProcessingTimeRange.start + resolvedSettings.photoProcessingTimeRange.duration
     }
     
+    /// Tag: willCapturePhotoFor
     func photoOutput(_ output: AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
         
         guard let maxPhotoProcessingTime = maxPhotoProcessingTime else {
@@ -66,7 +69,7 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         }
     }
     
-    // MARK: Saves capture to photo library
+    /// Saves capture to photo library
     func saveToPhotoLibrary(_ photoData: Data) {
         PHPhotoLibrary.requestAuthorization { status in
             if status == .authorized {
@@ -94,7 +97,7 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         }
     }
     
-    /// - Tag: DidFinishCapture
+    /// Tag: didFinishCaptureFor
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
         if let error = error {
             print("Error capturing photo: \(error)")

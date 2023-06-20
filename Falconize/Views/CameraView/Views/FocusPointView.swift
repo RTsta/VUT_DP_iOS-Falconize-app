@@ -10,6 +10,7 @@ import SwiftUI
 struct FocusPointView: View {
     var lineWidth: CGFloat = 1
     var linesLenght: CGFloat = 10
+    
     var body: some View {
         Canvas { context, size in
             context.stroke(
