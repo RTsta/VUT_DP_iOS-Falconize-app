@@ -18,3 +18,6 @@ This app was created as a master's work at the Brno University of Technology (BU
 ## 📱Screenshots
 ![ios1](./images/app1.png) |   ![ios2](./images/app2.png)
 --- | --- 
+
+## 📕Citation
+NÁCAR, Arthur. iOS aplikace pro záznam krátkých sportovních videí [online]. Brno, 2023 [cit. 2023-06-20]. Dostupné z: [https://www.vut.cz/studenti/zav-prace/detail/148759](https://www.vut.cz/studenti/zav-prace/detail/148759). Diplomová práce. Vysoké učení technické v Brně, Fakulta informačních technologií, Ústav počítačové grafiky a multimédií. Vedoucí práce Adam Herout.
